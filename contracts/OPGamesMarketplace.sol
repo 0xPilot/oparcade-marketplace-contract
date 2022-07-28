@@ -137,6 +137,12 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     address _owner
   ) private {}
 
+  function createOffer(address _nftAddress, uint256 _tokenId, address _payToken, uint256 _quantity, uint256 _pricePerItem, uint256 _deadline) external {}
+
+  function cancelOffer(address _nftAddress, uint256 _tokenId) external {}
+
+  function acceptOffer(address _nftAddress, uint256 _tokenId, address _creator) external nonReentrant {}
+
   /**
    @notice Update platform fee
    @dev Only owner
@@ -163,11 +169,19 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     return block.timestamp;
   }
 
-  function _validPayToken(address _payToken) internal {
+  function _validCollection(address _nftAddress) internal view {
+    require(
+      (addressRegistry.tokenRegistry() != address(0) &&
+        ITokenRegistry(addressRegistry.tokenRegistry()).enabledCollection(_nftAddress)),
+      "invalid collection"
+    );
+  }
+
+  function _validPayToken(address _payToken) internal view {
     require(
       _payToken == address(0) ||
         (addressRegistry.tokenRegistry() != address(0) &&
-          ITokenRegistry(addressRegistry.tokenRegistry()).enabled(_payToken)),
+          ITokenRegistry(addressRegistry.tokenRegistry()).enabledPayToken(_payToken)),
       "invalid pay token"
     );
   }
@@ -177,7 +191,7 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     uint256 _tokenId,
     address _owner,
     uint256 quantity
-  ) internal {
+  ) internal view {
     if (IERC165Upgradeable(_nftAddress).supportsInterface(INTERFACE_ID_ERC721)) {
       IERC721Upgradeable nft = IERC721Upgradeable(_nftAddress);
       require(nft.ownerOf(_tokenId) == _owner, "not owning item");
