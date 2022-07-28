@@ -137,11 +137,22 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     address _owner
   ) private {}
 
-  function createOffer(address _nftAddress, uint256 _tokenId, address _payToken, uint256 _quantity, uint256 _pricePerItem, uint256 _deadline) external {}
+  function createOffer(
+    address _nftAddress,
+    uint256 _tokenId,
+    address _payToken,
+    uint256 _quantity,
+    uint256 _pricePerItem,
+    uint256 _deadline
+  ) external {}
 
   function cancelOffer(address _nftAddress, uint256 _tokenId) external {}
 
-  function acceptOffer(address _nftAddress, uint256 _tokenId, address _creator) external nonReentrant {}
+  function acceptOffer(
+    address _nftAddress,
+    uint256 _tokenId,
+    address _creator
+  ) external nonReentrant {}
 
   /**
    @notice Update platform fee
