@@ -12,6 +12,18 @@ import "./interfaces/IAddressRegistry.sol";
 import "./interfaces/ITokenRegistry.sol";
 
 contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable, ERC721HolderUpgradeable {
+  /// @notice Events for the contract
+  event ItemListed(
+    address indexed owner,
+    address indexed nft,
+    uint256 tokenId,
+    uint256 quantity,
+    address payToken,
+    uint256 pricePerItem,
+    uint256 startingTime
+  );
+  event ItemUpdated(address indexed owner, address indexed nft, uint256 tokenId, address payToken, uint256 newPrice);
+  event ItemCanceled(address indexed owner, address indexed nft, uint256 tokenId);
   event PlatformFeeUpdated(address indexed by, uint256 oldPlatformFee, uint256 newPlatformFee);
   event PlatformFeeRecipientUpdated(
     address indexed by,
@@ -96,25 +108,51 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     address _payToken,
     uint256 _pricePerItem,
     uint256 _startAt
-  ) external {
+  ) external notListed(_nftAddress, _tokenId, msg.sender) {
     if (IERC165Upgradeable(_nftAddress).supportsInterface(INTERFACE_ID_ERC721)) {
       IERC721Upgradeable nft = IERC721Upgradeable(_nftAddress);
       require(nft.ownerOf(_tokenId) == msg.sender, "not owning item");
-      require(nft.isApprovedForAll(msg.sender, address(this)), "itme not approved");
+      require(nft.isApprovedForAll(msg.sender, address(this)), "item not approved");
     } else if (IERC165Upgradeable(_nftAddress).supportsInterface(INTERFACE_ID_ERC1155)) {
-      // TODO: ERC1155
+      IERC1155Upgradeable nft = IERC1155Upgradeable(_nftAddress);
+      require(nft.balanceOf(msg.sender, _tokenId) >= _quantity, "must hold enough nfts");
+      require(nft.isApprovedForAll(msg.sender, address(this)), "item not approved");
     } else {
       revert("invalid nft address");
     }
+
+    _validPayToken(_payToken);
+
+    listings[_nftAddress][_tokenId][msg.sender] = Listing(_quantity, _payToken, _pricePerItem, _startAt);
+
+    emit ItemListed(msg.sender, _nftAddress, _tokenId, _quantity, _payToken, _pricePerItem, _startAt);
   }
 
   function cancelListing(address _nftAddress, uint256 _tokenId)
     external
     nonReentrant
     isListed(_nftAddress, _tokenId, msg.sender)
-  {}
+  {
+    _cancelListing(_nftAddress, _tokenId, msg.sender);
+  }
 
-  function updateListing() external {}
+  function updateListing(
+    address _nftAddress,
+    uint256 _tokenId,
+    address _payToken,
+    uint256 _newPrice
+  ) external nonReentrant isListed(_nftAddress, _tokenId, _msgSender()) {
+    Listing storage listedItem = listings[_nftAddress][_tokenId][msg.sender];
+
+    _validOwner(_nftAddress, _tokenId, msg.sender, listedItem.quantity);
+
+    _validPayToken(_payToken);
+
+    listedItem.payToken = _payToken;
+    listedItem.pricePerItem = _newPrice;
+
+    emit ItemUpdated(msg.sender, _nftAddress, _tokenId, _payToken, _newPrice);
+  }
 
   // TODO: Withdraw NFT
 
@@ -212,5 +250,19 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     } else {
       revert("invalid nft address");
     }
+  }
+
+  function _cancelListing(
+    address _nftAddress,
+    uint256 _tokenId,
+    address _owner
+  ) private {
+    Listing memory listedItem = listings[_nftAddress][_tokenId][_owner];
+
+    _validOwner(_nftAddress, _tokenId, _owner, listedItem.quantity);
+
+    delete (listings[_nftAddress][_tokenId][_owner]);
+
+    emit ItemCanceled(_owner, _nftAddress, _tokenId);
   }
 }
