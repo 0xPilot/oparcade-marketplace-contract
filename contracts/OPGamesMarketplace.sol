@@ -4,6 +4,7 @@ pragma solidity ^0.8.11;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
@@ -11,10 +12,18 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
+import "./interfaces/IOPGamesAuction.sol";
 import "./interfaces/IAddressRegistry.sol";
 import "./interfaces/ITokenRegistry.sol";
 
-contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable, ERC721HolderUpgradeable {
+// TODO: Add Pausable
+contract OPGamesMarketplace is
+  Initializable,
+  OwnableUpgradeable,
+  ReentrancyGuardUpgradeable,
+  PausableUpgradeable,
+  ERC721HolderUpgradeable
+{
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
   /// @notice Events for the contract
@@ -38,6 +47,15 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
   );
   event ItemUpdated(address indexed owner, address indexed nft, uint256 tokenId, address payToken, uint256 newPrice);
   event ItemCanceled(address indexed owner, address indexed nft, uint256 tokenId);
+  event OfferCreated(
+    address indexed creator,
+    address indexed nft,
+    uint256 tokenId,
+    uint256 quantity,
+    address payToken,
+    uint256 pricePerItem,
+    uint256 deadline
+  );
   event PlatformFeeUpdated(address indexed by, uint256 oldPlatformFee, uint256 newPlatformFee);
   event PlatformFeeRecipientUpdated(
     address indexed by,
@@ -139,6 +157,7 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
   ) external initializer {
     __Ownable_init();
     __ReentrancyGuard_init();
+    __Pausable_init();
 
     addressRegistry = IAddressRegistry(_addressRegistry);
     feeRecipient = _feeRecipient;
@@ -239,14 +258,34 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     emit ItemSold(_owner, msg.sender, _nftAddress, _tokenId, listedItem.quantity, _payToken, listedItem.pricePerItem);
   }
 
-  function createOffer(
-    address _nftAddress,
-    uint256 _tokenId,
-    address _payToken,
-    uint256 _quantity,
-    uint256 _pricePerItem,
-    uint256 _deadline
-  ) external {}
+  // function createOffer(
+  //   address _nftAddress,
+  //   uint256 _tokenId,
+  //   IERC20Upgradeable _payToken,
+  //   uint256 _quantity,
+  //   uint256 _pricePerItem,
+  //   uint256 _deadline
+  // ) external offerNotExists(_nftAddress, _tokenId, msg.sender) {
+  //   require(
+  //     IERC165Upgradeable(_nftAddress).supportsInterface(INTERFACE_ID_ERC721) ||
+  //       IERC165Upgradeable(_nftAddress).supportsInterface(INTERFACE_ID_ERC1155),
+  //     "invalid nft address"
+  //   );
+
+  //   IOPGamesAuction auction = IOPGamesAuction(addressRegistry.auction());
+
+  //   (, , , uint256 startTime, , bool resulted) = auction.auctions(_nftAddress, _tokenId);
+
+  //   require(startTime == 0 || resulted == true, "cannot place an offer if auction is going on");
+
+  //   require(_deadline > _getNow(), "invalid expiration");
+
+  //   _validPayToken(address(_payToken));
+
+  //   offers[_nftAddress][_tokenId][msg.sender] = Offer(_payToken, _quantity, _pricePerItem, _deadline);
+
+  //   emit OfferCreated(msg.sender, _nftAddress, _tokenId, _quantity, address(_payToken), _pricePerItem, _deadline);
+  // }
 
   function cancelOffer(address _nftAddress, uint256 _tokenId) external {}
 
