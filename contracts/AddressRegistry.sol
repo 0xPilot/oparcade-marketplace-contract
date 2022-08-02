@@ -7,12 +7,16 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 contract AddressRegistry is Initializable, OwnableUpgradeable {
   event TokenRegistryUpdated(address indexed by, address indexed oldTokenRegistry, address indexed newTokenRegistry);
   event MarketplaceUpdated(address indexed by, address indexed oldMarketplace, address indexed newMarketplace);
+  event AuctionUpdated(address indexed by, address indexed oldAuction, address indexed newAuction);
 
   /// @notice TokenRegistry contract
   address public tokenRegistry;
 
   /// @notice Marketplace contract
   address public marketplace;
+
+  /// @notice Auction contract
+  address public auction;
 
   function initialize() external initializer {
     __Ownable_init();
@@ -38,5 +42,16 @@ contract AddressRegistry is Initializable, OwnableUpgradeable {
     emit MarketplaceUpdated(msg.sender, marketplace, _marketplace);
 
     marketplace = _marketplace;
+  }
+
+  /**
+   @notice Update Auction contract
+   @dev Only owner
+   @param _auction new Auction contract address
+   */
+  function updateAuction(address _auction) external onlyOwner {
+    emit AuctionUpdated(msg.sender, auction, _auction);
+
+    auction = _auction;
   }
 }
