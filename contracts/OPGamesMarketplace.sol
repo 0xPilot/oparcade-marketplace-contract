@@ -89,7 +89,7 @@ contract OPGamesMarketplace is
   mapping(address => mapping(uint256 => mapping(address => Offer))) public offers;
 
   /// @notice Platform fee recipient
-  address payable public feeRecipient;
+  address public feeRecipient;
 
   /// @notice Platform fee
   uint256 public platformFee;
@@ -152,12 +152,15 @@ contract OPGamesMarketplace is
 
   function initialize(
     address _addressRegistry,
-    address payable _feeRecipient,
+    address _feeRecipient,
     uint256 _platformFee
   ) external initializer {
     __Ownable_init();
     __ReentrancyGuard_init();
     __Pausable_init();
+
+    require(_addressRegistry != address(0), "unexpected address registry");
+    require(_feeRecipient != address(0), "unexpected fee recipient");
 
     addressRegistry = IAddressRegistry(_addressRegistry);
     feeRecipient = _feeRecipient;
@@ -311,7 +314,9 @@ contract OPGamesMarketplace is
    @dev Only owner
    @param _feeRecipient new platform fee recipient
    */
-  function updatePlatformFeeRecipient(address payable _feeRecipient) external onlyOwner {
+  function updatePlatformFeeRecipient(address _feeRecipient) external onlyOwner {
+    require(_feeRecipient != address(0), "unexpected fee recipient");
+
     emit PlatformFeeRecipientUpdated(msg.sender, feeRecipient, _feeRecipient);
 
     feeRecipient = _feeRecipient;
@@ -331,9 +336,9 @@ contract OPGamesMarketplace is
 
   function _validPayToken(address _payToken) internal view {
     require(
-      _payToken == address(0) ||
-        (addressRegistry.tokenRegistry() != address(0) &&
-          ITokenRegistry(addressRegistry.tokenRegistry()).enabledPayToken(_payToken)),
+      // _payToken == address(0) ||
+      (addressRegistry.tokenRegistry() != address(0) &&
+        ITokenRegistry(addressRegistry.tokenRegistry()).enabledPayToken(_payToken)),
       "invalid pay token"
     );
   }
