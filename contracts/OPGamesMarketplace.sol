@@ -16,7 +16,6 @@ import "./interfaces/IOPGamesAuction.sol";
 import "./interfaces/IAddressRegistry.sol";
 import "./interfaces/ITokenRegistry.sol";
 
-// TODO: Add Pausable
 contract OPGamesMarketplace is
   Initializable,
   OwnableUpgradeable,
@@ -82,14 +81,14 @@ contract OPGamesMarketplace is
   bytes4 private constant INTERFACE_ID_ERC721 = 0x80ac58cd;
   bytes4 private constant INTERFACE_ID_ERC1155 = 0xd9b67a26;
 
-  /// @notice NFTAddress -> Token ID -> Owner -> Listing
+  /// @notice NFT Address -> Token ID -> Owner -> Listing
   mapping(address => mapping(uint256 => mapping(address => Listing))) public listings;
 
-  /// @notice NftAddress -> Token ID -> Offerer -> Offer
-  mapping(address => mapping(uint256 => mapping(address => Offer))) public offers;
+  // /// @notice NFT Address -> Token ID -> Offerer -> Offer
+  // mapping(address => mapping(uint256 => mapping(address => Offer))) public offers;
 
   /// @notice Platform fee recipient
-  address public feeRecipient;
+  address payable public feeRecipient;
 
   /// @notice Platform fee
   uint256 public platformFee;
@@ -130,29 +129,29 @@ contract OPGamesMarketplace is
     _;
   }
 
-  modifier offerExists(
-    address _nftAddress,
-    uint256 _tokenId,
-    address _creator
-  ) {
-    Offer memory offer = offers[_nftAddress][_tokenId][_creator];
-    require(offer.quantity > 0 && offer.deadline > _getNow(), "offer not exists or expired");
-    _;
-  }
+  // modifier offerExists(
+  //   address _nftAddress,
+  //   uint256 _tokenId,
+  //   address _creator
+  // ) {
+  //   Offer memory offer = offers[_nftAddress][_tokenId][_creator];
+  //   require(offer.quantity > 0 && offer.deadline > _getNow(), "offer not exists or expired");
+  //   _;
+  // }
 
-  modifier offerNotExists(
-    address _nftAddress,
-    uint256 _tokenId,
-    address _creator
-  ) {
-    Offer memory offer = offers[_nftAddress][_tokenId][_creator];
-    require(offer.quantity == 0 || offer.deadline <= _getNow(), "offer already created");
-    _;
-  }
+  // modifier offerNotExists(
+  //   address _nftAddress,
+  //   uint256 _tokenId,
+  //   address _creator
+  // ) {
+  //   Offer memory offer = offers[_nftAddress][_tokenId][_creator];
+  //   require(offer.quantity == 0 || offer.deadline <= _getNow(), "offer already created");
+  //   _;
+  // }
 
   function initialize(
     address _addressRegistry,
-    address _feeRecipient,
+    address payable _feeRecipient,
     uint256 _platformFee
   ) external initializer {
     __Ownable_init();
@@ -188,6 +187,7 @@ contract OPGamesMarketplace is
       revert("invalid nft address");
     }
 
+    _validCollection(_nftAddress);
     _validPayToken(_payToken);
 
     listings[_nftAddress][_tokenId][msg.sender] = Listing(_quantity, _payToken, _pricePerItem, _startAt);
@@ -227,8 +227,15 @@ contract OPGamesMarketplace is
     address _nftAddress,
     uint256 _tokenId,
     address _payToken,
-    address _owner
-  ) external nonReentrant isListed(_nftAddress, _tokenId, _owner) validListing(_nftAddress, _tokenId, _owner) {
+    address payable _owner
+  )
+    external
+    payable
+    nonReentrant
+    whenNotPaused
+    isListed(_nftAddress, _tokenId, _owner)
+    validListing(_nftAddress, _tokenId, _owner)
+  {
     Listing memory listedItem = listings[_nftAddress][_tokenId][_owner];
     require(listedItem.payToken == _payToken, "invalid pay token");
 
@@ -239,15 +246,19 @@ contract OPGamesMarketplace is
     address _nftAddress,
     uint256 _tokenId,
     address _payToken,
-    address _owner
+    address payable _owner
   ) private {
     Listing memory listedItem = listings[_nftAddress][_tokenId][_owner];
 
     uint256 price = listedItem.pricePerItem * listedItem.quantity;
-    uint256 feeAmount = (price * platformFee) / 1e3;
+    uint256 feeAmount = (price * platformFee) / 100_0;
 
-    IERC20Upgradeable(_payToken).safeTransferFrom(msg.sender, feeRecipient, feeAmount);
-    IERC20Upgradeable(_payToken).safeTransferFrom(msg.sender, _owner, price - feeAmount);
+    // Transfer token to owner
+    if (_payToken == address(0)) {
+      require(msg.value == price, "insufficient Ether to buy");
+    }
+    _tokenTransferFrom(msg.sender, feeRecipient, _payToken, feeAmount);
+    _tokenTransferFrom(msg.sender, _owner, _payToken, price - feeAmount);
 
     // Transfer NFT to buyer
     if (IERC165Upgradeable(_nftAddress).supportsInterface(INTERFACE_ID_ERC721)) {
@@ -314,7 +325,7 @@ contract OPGamesMarketplace is
    @dev Only owner
    @param _feeRecipient new platform fee recipient
    */
-  function updatePlatformFeeRecipient(address _feeRecipient) external onlyOwner {
+  function updatePlatformFeeRecipient(address payable _feeRecipient) external onlyOwner {
     require(_feeRecipient != address(0), "unexpected fee recipient");
 
     emit PlatformFeeRecipientUpdated(msg.sender, feeRecipient, _feeRecipient);
@@ -336,9 +347,9 @@ contract OPGamesMarketplace is
 
   function _validPayToken(address _payToken) internal view {
     require(
-      // _payToken == address(0) ||
-      (addressRegistry.tokenRegistry() != address(0) &&
-        ITokenRegistry(addressRegistry.tokenRegistry()).enabledPayToken(_payToken)),
+      _payToken == address(0) ||
+        (addressRegistry.tokenRegistry() != address(0) &&
+          ITokenRegistry(addressRegistry.tokenRegistry()).enabledPayToken(_payToken)),
       "invalid pay token"
     );
   }
@@ -372,5 +383,19 @@ contract OPGamesMarketplace is
     delete (listings[_nftAddress][_tokenId][_owner]);
 
     emit ItemCanceled(_owner, _nftAddress, _tokenId);
+  }
+
+  function _tokenTransferFrom(
+    address _from,
+    address payable _to,
+    address _payToken,
+    uint256 _amount
+  ) private {
+    if (_payToken == address(0)) {
+      (bool sent, ) = _to.call{value: _amount}("");
+      require(sent, "failed to send Ether");
+    } else {
+      IERC20Upgradeable(_payToken).safeTransferFrom(_from, _to, _amount);
+    }
   }
 }
