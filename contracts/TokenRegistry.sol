@@ -3,12 +3,16 @@ pragma solidity ^0.8.11;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol";
 
 contract TokenRegistry is Initializable, OwnableUpgradeable {
   event CollectionAdded(address indexed by, address indexed collection);
   event CollectionRemoved(address indexed by, address indexed collection);
   event PayTokenAdded(address indexed by, address indexed token);
   event PayTokenRemoved(address indexed by, address indexed token);
+
+  bytes4 private constant INTERFACE_ID_ERC721 = 0x80ac58cd;
+  bytes4 private constant INTERFACE_ID_ERC1155 = 0xd9b67a26;
 
   /// @notice NFTAddress -> Bool
   mapping(address => bool) public enabledCollection;
@@ -27,6 +31,11 @@ contract TokenRegistry is Initializable, OwnableUpgradeable {
    */
   function addCollection(address _nftAddress) external onlyOwner {
     require(!enabledCollection[_nftAddress], "collection already added");
+    require(
+      IERC165Upgradeable(_nftAddress).supportsInterface(INTERFACE_ID_ERC721) ||
+        IERC165Upgradeable(_nftAddress).supportsInterface(INTERFACE_ID_ERC1155),
+      "unexpected collection"
+    );
 
     enabledCollection[_nftAddress] = true;
 
@@ -53,6 +62,7 @@ contract TokenRegistry is Initializable, OwnableUpgradeable {
    */
   function addPayToken(address _token) external onlyOwner {
     require(!enabledPayToken[_token], "token already added");
+    require(_token != address(0), "zero token address");
 
     enabledPayToken[_token] = true;
 
