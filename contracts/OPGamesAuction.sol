@@ -77,6 +77,7 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
 
     require(_addressRegistry != address(0), "unexpected address registry");
     require(_feeRecipient != address(0), "unexpected fee recipient");
+    require(_platformFee < 100_0, "platform fee exceeded");
 
     addressRegistry = IAddressRegistry(_addressRegistry);
     feeRecipient = _feeRecipient;
@@ -100,7 +101,7 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     );
 
     require(
-      // _payToken == address(0) ||
+      _payToken == address(0) ||
       (addressRegistry.tokenRegistry() != address(0) &&
         ITokenRegistry(addressRegistry.tokenRegistry()).enabledPayToken(_payToken)),
       "invalid pay token"
@@ -109,15 +110,11 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     _createAuction(_nftAddress, _tokenId, _payToken, _reservePrice, _startTimestamp, minBidReserve, _endTimestamp);
   }
 
-  function _getNow() internal view virtual returns (uint256) {
-    return block.timestamp;
-  }
-
   function placeBid(
     address _nftAddress,
     uint256 _tokenId,
     uint256 _bidAmount
-  ) external nonReentrant whenNotPaused {
+  ) external payable nonReentrant whenNotPaused {
     require(msg.sender == tx.origin, "no contracts permitted");
 
     // Check the auction to see if this is a valid bid
@@ -228,7 +225,7 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     // Clean up the highest bid
     delete highestBids[_nftAddress][_tokenId];
 
-    uint256 feeAmount = (winningBid * platformFee) / 1e3;
+    uint256 feeAmount = (winningBid * platformFee) / 100_0;
 
     IERC20Upgradeable payToken = IERC20Upgradeable(auction.payToken);
     payToken.safeTransfer(feeRecipient, feeAmount);
@@ -333,5 +330,25 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     // }
 
     emit BidRefunded(_nftAddress, _tokenId, _currentHighestBidder, _currentHighestBid);
+  }
+
+  function _getNow() internal view virtual returns (uint256) {
+    return block.timestamp;
+  }
+
+  /**
+   * @notice Pause Oparcade
+   * @dev Only owner
+   */
+  function pause() external onlyOwner {
+    _pause();
+  }
+
+  /**
+   * @notice Resume Oparcade
+   * @dev Only owner
+   */
+  function unpause() external onlyOwner {
+    _unpause();
   }
 }
