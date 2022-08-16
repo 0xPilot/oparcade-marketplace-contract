@@ -12,7 +12,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "./interfaces/IAddressRegistry.sol";
 import "./interfaces/ITokenRegistry.sol";
 
-// TODO: Add Pausable
 contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradeable {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -66,6 +65,8 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
   /// @notice AddressRegistry
   IAddressRegistry public addressRegistry;
 
+  receive() external payable {}
+
   function initialize(
     address _addressRegistry,
     address payable _feeRecipient,
@@ -100,12 +101,8 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
       "not owner and or contract not approved"
     );
 
-    require(
-      _payToken == address(0) ||
-      (addressRegistry.tokenRegistry() != address(0) &&
-        ITokenRegistry(addressRegistry.tokenRegistry()).enabledPayToken(_payToken)),
-      "invalid pay token"
-    );
+    _validCollection(_nftAddress);
+    _validPayToken(_payToken);
 
     _createAuction(_nftAddress, _tokenId, _payToken, _reservePrice, _startTimestamp, minBidReserve, _endTimestamp);
   }
@@ -122,7 +119,6 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
 
     // Ensure auction is in flight
     require(_getNow() >= auction.startTime && _getNow() <= auction.endTime, "bidding outside of the auction window");
-    // require(auction.payToken != address(0), "ERC20 method used for auction");
 
     _placeBid(_nftAddress, _tokenId, _bidAmount);
   }
@@ -142,15 +138,8 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     HighestBid storage highestBid = highestBids[_nftAddress][_tokenId];
     uint256 minBidRequired = highestBid.bid + minBidIncrement;
 
-    // if (auction.payToken != address(0)) {
     require(_bidAmount >= minBidRequired, "failed to outbid highest bidder");
-
-    IERC20Upgradeable payToken = IERC20Upgradeable(auction.payToken);
-    payToken.safeTransferFrom(msg.sender, address(this), _bidAmount);
-    // }
-    //  else {
-    //   require(msg.value >= minBidRequired, "failed to outbid highest bidder");
-    // }
+    _tokenTransferFrom(msg.sender, address(this), auction.payToken, _bidAmount);
 
     // Refund existing top bidder if found
     if (highestBid.bidder != address(0)) {
@@ -165,7 +154,7 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     emit BidPlaced(_nftAddress, _tokenId, msg.sender, _bidAmount);
   }
 
-  function withdrawBid(address _nftAddress, uint256 _tokenId) external nonReentrant whenNotPaused {
+  function withdrawBid(address _nftAddress, uint256 _tokenId) external nonReentrant {
     HighestBid storage highestBid = highestBids[_nftAddress][_tokenId];
 
     // Ensure highest bidder is the caller
@@ -189,7 +178,7 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     emit BidWithdrawn(_nftAddress, _tokenId, msg.sender, previousBid);
   }
 
-  function resultAuction(address _nftAddress, uint256 _tokenId) external nonReentrant {
+  function resultAuction(address _nftAddress, uint256 _tokenId) external nonReentrant whenNotPaused {
     // Check the auction to see if it can be resulted
     Auction storage auction = auctions[_nftAddress][_tokenId];
 
@@ -289,8 +278,10 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
       IERC721Upgradeable(_nftAddress).ownerOf(_tokenId) == msg.sender && msg.sender == auction.owner,
       "sender must be owner"
     );
+
     // Check auction is real
     require(auction.endTime > 0, "no auction exists");
+
     // Check auction not already resulted
     require(!auction.resulted, "auction already resulted");
 
@@ -320,16 +311,43 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     uint256 _currentHighestBid
   ) private {
     Auction memory auction = auctions[_nftAddress][_tokenId];
-    // if (auction.payToken == address(0)) {
-    //   // refund previous best (if bid exists)
-    //   (bool successRefund, ) = _currentHighestBidder.call{value: _currentHighestBid}("");
-    //   require(successRefund, "failed to refund previous bidder");
-    // } else {
-    IERC20Upgradeable payToken = IERC20Upgradeable(auction.payToken);
-    payToken.safeTransfer(_currentHighestBidder, _currentHighestBid);
-    // }
+
+    _tokenTransferFrom(address(this), _currentHighestBidder, auction.payToken, _currentHighestBid);
 
     emit BidRefunded(_nftAddress, _tokenId, _currentHighestBidder, _currentHighestBid);
+  }
+
+  function _validPayToken(address _payToken) internal view {
+    require(
+      _payToken == address(0) ||
+        (addressRegistry.tokenRegistry() != address(0) &&
+          ITokenRegistry(addressRegistry.tokenRegistry()).enabledPayToken(_payToken)),
+      "invalid pay token"
+    );
+  }
+
+  function _validCollection(address _nftAddress) internal view {
+    require(
+      (addressRegistry.tokenRegistry() != address(0) &&
+        ITokenRegistry(addressRegistry.tokenRegistry()).enabledCollection(_nftAddress)),
+      "invalid collection"
+    );
+  }
+
+  function _tokenTransferFrom(
+    address _from,
+    address _to,
+    address _payToken,
+    uint256 _amount
+  ) private {
+    if (_payToken == address(0)) {
+      require(_from == address(this), "invalid Ether sender");
+      
+      (bool sent, ) = payable(_to).call{value: _amount}("");
+      require(sent, "failed to send Ether");
+    } else {
+      IERC20Upgradeable(_payToken).safeTransferFrom(_from, _to, _amount);
+    }
   }
 
   function _getNow() internal view virtual returns (uint256) {
@@ -337,7 +355,7 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
   }
 
   /**
-   * @notice Pause Oparcade
+   * @notice Pause Auction
    * @dev Only owner
    */
   function pause() external onlyOwner {
@@ -345,7 +363,7 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
   }
 
   /**
-   * @notice Resume Oparcade
+   * @notice Resume Auction
    * @dev Only owner
    */
   function unpause() external onlyOwner {
