@@ -5,7 +5,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
@@ -16,13 +15,7 @@ import "./interfaces/IOPGamesAuction.sol";
 import "./interfaces/IAddressRegistry.sol";
 import "./interfaces/ITokenRegistry.sol";
 
-contract OPGamesMarketplace is
-  Initializable,
-  OwnableUpgradeable,
-  ReentrancyGuardUpgradeable,
-  PausableUpgradeable,
-  ERC721HolderUpgradeable
-{
+contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradeable {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
   /// @notice Events for the contract
@@ -149,6 +142,8 @@ contract OPGamesMarketplace is
   //   _;
   // }
 
+  receive() external payable {}
+
   function initialize(
     address _addressRegistry,
     address payable _feeRecipient,
@@ -160,13 +155,13 @@ contract OPGamesMarketplace is
 
     require(_addressRegistry != address(0), "unexpected address registry");
     require(_feeRecipient != address(0), "unexpected fee recipient");
+    require(_platformFee < 100_0, "platform fee exceeded");
 
     addressRegistry = IAddressRegistry(_addressRegistry);
     feeRecipient = _feeRecipient;
     platformFee = _platformFee;
   }
 
-  // TODO: Lock NFT
   function listItem(
     address _nftAddress,
     uint256 _tokenId,
@@ -220,8 +215,6 @@ contract OPGamesMarketplace is
 
     emit ItemUpdated(msg.sender, _nftAddress, _tokenId, _payToken, _newPrice);
   }
-
-  // TODO: Withdraw NFT
 
   function buyItem(
     address _nftAddress,
@@ -315,6 +308,8 @@ contract OPGamesMarketplace is
    @param _platformFee new platform fee
    */
   function updatePlatformFee(uint256 _platformFee) external onlyOwner {
+    require(_platformFee < 100_0, "platform fee exceeded");
+
     emit PlatformFeeUpdated(msg.sender, platformFee, _platformFee);
 
     platformFee = _platformFee;
@@ -392,10 +387,28 @@ contract OPGamesMarketplace is
     uint256 _amount
   ) private {
     if (_payToken == address(0)) {
+      require(_from == address(this), "invalid Ether sender");
+
       (bool sent, ) = _to.call{value: _amount}("");
       require(sent, "failed to send Ether");
     } else {
       IERC20Upgradeable(_payToken).safeTransferFrom(_from, _to, _amount);
     }
+  }
+
+  /**
+   * @notice Pause Marketplace
+   * @dev Only owner
+   */
+  function pause() external onlyOwner {
+    _pause();
+  }
+
+  /**
+   * @notice Resume Marketplace
+   * @dev Only owner
+   */
+  function unpause() external onlyOwner {
+    _unpause();
   }
 }
