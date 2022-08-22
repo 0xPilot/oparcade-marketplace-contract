@@ -48,6 +48,7 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     uint256 pricePerItem,
     uint256 deadline
   );
+  event OfferCanceled(address indexed creator, address indexed nft, uint256 tokenId);
   event PlatformFeeUpdated(address indexed by, uint256 oldPlatformFee, uint256 newPlatformFee);
   event PlatformFeeRecipientUpdated(
     address indexed by,
@@ -77,8 +78,8 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
   /// @notice NFT Address -> Token ID -> Owner -> Listing
   mapping(address => mapping(uint256 => mapping(address => Listing))) public listings;
 
-  // /// @notice NFT Address -> Token ID -> Offerer -> Offer
-  // mapping(address => mapping(uint256 => mapping(address => Offer))) public offers;
+  /// @notice NFT Address -> Token ID -> Offerer -> Offer
+  mapping(address => mapping(uint256 => mapping(address => Offer))) public offers;
 
   /// @notice Platform fee recipient
   address payable public feeRecipient;
@@ -122,25 +123,25 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     _;
   }
 
-  // modifier offerExists(
-  //   address _nftAddress,
-  //   uint256 _tokenId,
-  //   address _creator
-  // ) {
-  //   Offer memory offer = offers[_nftAddress][_tokenId][_creator];
-  //   require(offer.quantity > 0 && offer.deadline > _getNow(), "offer not exists or expired");
-  //   _;
-  // }
+  modifier offerExists(
+    address _nftAddress,
+    uint256 _tokenId,
+    address _creator
+  ) {
+    Offer memory offer = offers[_nftAddress][_tokenId][_creator];
+    require(offer.quantity > 0 && offer.deadline > _getNow(), "offer not exists or expired");
+    _;
+  }
 
-  // modifier offerNotExists(
-  //   address _nftAddress,
-  //   uint256 _tokenId,
-  //   address _creator
-  // ) {
-  //   Offer memory offer = offers[_nftAddress][_tokenId][_creator];
-  //   require(offer.quantity == 0 || offer.deadline <= _getNow(), "offer already created");
-  //   _;
-  // }
+  modifier offerNotExists(
+    address _nftAddress,
+    uint256 _tokenId,
+    address _creator
+  ) {
+    Offer memory offer = offers[_nftAddress][_tokenId][_creator];
+    require(offer.quantity == 0 || offer.deadline <= _getNow(), "offer already created");
+    _;
+  }
 
   receive() external payable {}
 
@@ -265,36 +266,41 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     emit ItemSold(_owner, msg.sender, _nftAddress, _tokenId, listedItem.quantity, _payToken, listedItem.pricePerItem);
   }
 
-  // function createOffer(
-  //   address _nftAddress,
-  //   uint256 _tokenId,
-  //   IERC20Upgradeable _payToken,
-  //   uint256 _quantity,
-  //   uint256 _pricePerItem,
-  //   uint256 _deadline
-  // ) external offerNotExists(_nftAddress, _tokenId, msg.sender) {
-  //   require(
-  //     IERC165Upgradeable(_nftAddress).supportsInterface(INTERFACE_ID_ERC721) ||
-  //       IERC165Upgradeable(_nftAddress).supportsInterface(INTERFACE_ID_ERC1155),
-  //     "invalid nft address"
-  //   );
+  function createOffer(
+    address _nftAddress,
+    uint256 _tokenId,
+    IERC20Upgradeable _payToken,
+    uint256 _quantity,
+    uint256 _pricePerItem,
+    uint256 _deadline
+  ) external offerNotExists(_nftAddress, _tokenId, msg.sender) {
+    require(
+      IERC165Upgradeable(_nftAddress).supportsInterface(INTERFACE_ID_ERC721) ||
+        IERC165Upgradeable(_nftAddress).supportsInterface(INTERFACE_ID_ERC1155),
+      "invalid nft address"
+    );
 
-  //   IOPGamesAuction auction = IOPGamesAuction(addressRegistry.auction());
+    IOPGamesAuction auction = IOPGamesAuction(addressRegistry.auction());
 
-  //   (, , , uint256 startTime, , bool resulted) = auction.auctions(_nftAddress, _tokenId);
+    (, , , uint256 startTime, , bool resulted) = auction.auctions(_nftAddress, _tokenId);
 
-  //   require(startTime == 0 || resulted == true, "cannot place an offer if auction is going on");
+    require(startTime == 0 || resulted == true, "cannot place an offer if auction is going on");
 
-  //   require(_deadline > _getNow(), "invalid expiration");
+    require(_deadline > _getNow(), "invalid expiration");
 
-  //   _validPayToken(address(_payToken));
+    _validPayToken(address(_payToken));
+    require(address(_payToken) != address(0), "disabled native token");
 
-  //   offers[_nftAddress][_tokenId][msg.sender] = Offer(_payToken, _quantity, _pricePerItem, _deadline);
+    offers[_nftAddress][_tokenId][msg.sender] = Offer(_payToken, _quantity, _pricePerItem, _deadline);
 
-  //   emit OfferCreated(msg.sender, _nftAddress, _tokenId, _quantity, address(_payToken), _pricePerItem, _deadline);
-  // }
+    emit OfferCreated(msg.sender, _nftAddress, _tokenId, _quantity, address(_payToken), _pricePerItem, _deadline);
+  }
 
-  function cancelOffer(address _nftAddress, uint256 _tokenId) external {}
+  function cancelOffer(address _nftAddress, uint256 _tokenId) external {
+    delete (offers[_nftAddress][_tokenId][msg.sender]);
+
+    emit OfferCanceled(msg.sender, _nftAddress, _tokenId);
+  }
 
   function acceptOffer(
     address _nftAddress,
