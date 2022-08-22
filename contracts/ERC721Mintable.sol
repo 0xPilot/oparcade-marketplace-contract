@@ -26,7 +26,7 @@ contract ERC721Mintable is ERC721Enumerable {
     return baseTokenURI;
   }
 
-  function mint(address _to, uint256 _tokenCount) public virtual {
+  function mint(address _to, uint256 _tokenCount) external {
     require(msg.sender == creator, "only creator");
 
     _mintTokens(_to, _tokenCount);

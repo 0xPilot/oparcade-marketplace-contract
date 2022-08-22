@@ -30,7 +30,7 @@ contract ERC1155Mintable is ERC1155Supply {
     address _to,
     uint256 _amount,
     bytes memory _data
-  ) public virtual {
+  ) external {
     require(msg.sender == creator, "only creator");
     _mintSingleToken(_to, _amount, _data);
   }
@@ -39,7 +39,7 @@ contract ERC1155Mintable is ERC1155Supply {
     address _to,
     uint256[] memory _amounts,
     bytes memory _data
-  ) public virtual {
+  ) external {
     require(msg.sender == creator, "only creator");
     _mintBatchTokens(_to, _amounts, _data);
   }

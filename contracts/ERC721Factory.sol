@@ -15,7 +15,7 @@ contract ERC721Factory {
     uint256 _tokenCount
   ) external returns (address) {
     address collection = address(new ERC721Mintable(msg.sender, _name, _symbol, _baseTokenURI, _to, _tokenCount));
-    
+
     return collection;
   }
 }
