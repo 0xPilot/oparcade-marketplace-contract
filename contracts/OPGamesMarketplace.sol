@@ -221,7 +221,7 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     address _nftAddress,
     uint256 _tokenId,
     address _payToken,
-    address payable _owner
+    address _owner
   )
     external
     payable
@@ -240,7 +240,7 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     address _nftAddress,
     uint256 _tokenId,
     address _payToken,
-    address payable _owner
+    address _owner
   ) private {
     Listing memory listedItem = listings[_nftAddress][_tokenId][_owner];
 
@@ -306,7 +306,39 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     address _nftAddress,
     uint256 _tokenId,
     address _creator
-  ) external nonReentrant {}
+  ) external nonReentrant offerExists(_nftAddress, _tokenId, _creator) {
+    Offer memory offer = offers[_nftAddress][_tokenId][_creator];
+
+    _validOwner(_nftAddress, _tokenId, msg.sender, offer.quantity);
+
+    uint256 price = offer.pricePerItem * offer.quantity;
+    uint256 feeAmount = (price * platformFee) / 100_0;
+
+    _tokenTransferFrom(_creator, feeRecipient, address(offer.payToken), feeAmount);
+    _tokenTransferFrom(_creator, msg.sender, address(offer.payToken), price - feeAmount);
+
+    // Transfer NFT to buyer
+    if (IERC165Upgradeable(_nftAddress).supportsInterface(INTERFACE_ID_ERC721)) {
+      IERC721Upgradeable(_nftAddress).safeTransferFrom(msg.sender, _creator, _tokenId);
+    } else {
+      IERC1155Upgradeable(_nftAddress).safeTransferFrom(msg.sender, _creator, _tokenId, offer.quantity, bytes(""));
+    }
+
+    delete (listings[_nftAddress][_tokenId][msg.sender]);
+    delete (offers[_nftAddress][_tokenId][_creator]);
+
+    emit ItemSold(
+      msg.sender,
+      _creator,
+      _nftAddress,
+      _tokenId,
+      offer.quantity,
+      address(offer.payToken),
+      offer.pricePerItem
+    );
+
+    emit OfferCanceled(_creator, _nftAddress, _tokenId);
+  }
 
   /**
    @notice Update platform fee
@@ -388,14 +420,14 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
 
   function _tokenTransferFrom(
     address _from,
-    address payable _to,
+    address _to,
     address _payToken,
     uint256 _amount
   ) private {
     if (_payToken == address(0)) {
       require(_from == address(this), "invalid Ether sender");
 
-      (bool sent, ) = _to.call{value: _amount}("");
+      (bool sent, ) = payable(_to).call{value: _amount}("");
       require(sent, "failed to send Ether");
     } else {
       IERC20Upgradeable(_payToken).safeTransferFrom(_from, _to, _amount);

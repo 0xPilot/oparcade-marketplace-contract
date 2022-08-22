@@ -342,7 +342,7 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
   ) private {
     if (_payToken == address(0)) {
       require(_from == address(this), "invalid Ether sender");
-      
+
       (bool sent, ) = payable(_to).call{value: _amount}("");
       require(sent, "failed to send Ether");
     } else {
