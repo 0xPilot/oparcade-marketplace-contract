@@ -5,6 +5,37 @@
     "type": "constructor"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "by",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "symbol",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      }
+    ],
+    "name": "ERC1155CollectionMinted",
+    "type": "event"
+  },
+  {
     "inputs": [
       {
         "internalType": "string",
@@ -28,6 +59,11 @@
       },
       {
         "internalType": "uint256[]",
+        "name": "_ids",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
         "name": "_amounts",
         "type": "uint256[]"
       },
@@ -37,7 +73,7 @@
         "type": "bytes"
       }
     ],
-    "name": "createERC1155",
+    "name": "mintERC1155Collection",
     "outputs": [
       {
         "internalType": "address",

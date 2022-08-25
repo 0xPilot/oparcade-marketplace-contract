@@ -382,7 +382,7 @@
         "type": "address"
       },
       {
-        "internalType": "address payable",
+        "internalType": "address",
         "name": "_owner",
         "type": "address"
       }
