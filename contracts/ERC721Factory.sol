@@ -17,7 +17,7 @@ contract ERC721Factory {
    * @param _to Collection receiver
    * @param _tokenCount NFT count to mint
    */
-  function createERC721(
+  function mintERC721Collection(
     string memory _name,
     string memory _symbol,
     string memory _baseTokenURI,
