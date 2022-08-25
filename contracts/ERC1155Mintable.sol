@@ -4,11 +4,14 @@ pragma solidity ^0.8.11;
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 
 contract ERC1155Mintable is ERC1155Supply {
+  /// @dev Collection name
   string public name;
+
+  /// @dev Collection synbol
   string public symbol;
+
+  /// @dev Collection creator
   address public creator;
-  uint256 public currentTokenId;
-  string private baseTokenURI;
 
   constructor(
     address _creator,
@@ -16,6 +19,7 @@ contract ERC1155Mintable is ERC1155Supply {
     string memory _symbol,
     string memory _uri,
     address _to,
+    uint256[] memory _ids,
     uint256[] memory _amounts,
     bytes memory _data
   ) ERC1155(_uri) {
@@ -23,48 +27,25 @@ contract ERC1155Mintable is ERC1155Supply {
     symbol = _symbol;
     creator = _creator;
 
-    _mintBatchTokens(_to, _amounts, _data);
+    _mintBatch(_to, _ids, _amounts, _data);
   }
 
+  /**
+   * @notice Mint ERC1155 NFTs
+   * @dev Only collection creator
+   * @param _to NFT receiver
+   * @param _ids Token Id array to mint
+   * @param _amounts Token amount array to mint
+   * @param _data Data
+   */
   function mint(
     address _to,
-    uint256 _amount,
-    bytes memory _data
-  ) external {
-    require(msg.sender == creator, "only creator");
-    _mintSingleToken(_to, _amount, _data);
-  }
-
-  function mintBatch(
-    address _to,
+    uint256[] memory _ids,
     uint256[] memory _amounts,
     bytes memory _data
   ) external {
     require(msg.sender == creator, "only creator");
-    _mintBatchTokens(_to, _amounts, _data);
-  }
 
-  function _mintSingleToken(
-    address _to,
-    uint256 _amount,
-    bytes memory _data
-  ) private {
-    currentTokenId++;
-    _mint(_to, currentTokenId, _amount, _data);
-  }
-
-  function _mintBatchTokens(
-    address _to,
-    uint256[] memory _amounts,
-    bytes memory _data
-  ) private {
-    uint256 tokenCount = _amounts.length;
-    uint256[] memory ids = new uint256[](tokenCount);
-    for (uint256 i; i < tokenCount; i++) {
-      currentTokenId++;
-      ids[i] = currentTokenId;
-    }
-
-    _mintBatch(_to, ids, _amounts, _data);
+    _mintBatch(_to, _ids, _amounts, _data);
   }
 }
