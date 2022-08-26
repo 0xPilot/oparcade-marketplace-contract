@@ -163,6 +163,15 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     platformFee = _platformFee;
   }
 
+  /**
+   * @notice Method for listing NFT
+   * @param _nftAddress Address of NFT contract
+   * @param _tokenId Token ID of NFT
+   * @param _quantity token amount to list (needed for ERC-1155 NFTs, set as 1 for ERC-721)
+   * @param _payToken Paying token
+   * @param _pricePerItem sale price for each iteam
+   * @param _startAt scheduling for a future sale
+   */
   function listItem(
     address _nftAddress,
     uint256 _tokenId,
@@ -191,6 +200,11 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     emit ItemListed(msg.sender, _nftAddress, _tokenId, _quantity, _payToken, _pricePerItem, _startAt);
   }
 
+  /**
+   * @notice Method for canceling listed NFT
+   * @param _nftAddress Addres of NFT contract
+   * @param _tokenId Token ID of NFT
+   */
   function cancelListing(address _nftAddress, uint256 _tokenId)
     external
     nonReentrant
@@ -199,6 +213,13 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     _cancelListing(_nftAddress, _tokenId, msg.sender);
   }
 
+  /**
+   * @notice Method for updating listed NFT
+   * @param _nftAddress Address of NFT contract
+   * @param _tokenId Token ID of NFT
+   * @param _payToken Payment token address
+   * @param _newPrice New sale price for each item
+   */
   function updateListing(
     address _nftAddress,
     uint256 _tokenId,
@@ -217,6 +238,13 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     emit ItemUpdated(msg.sender, _nftAddress, _tokenId, _payToken, _newPrice);
   }
 
+  /**
+   * @notice Method for buying listed NFT
+   * @param _nftAddress Address of NFT contract
+   * @param _tokenId Token ID of NFT
+   * @param _payToken Payment token address
+   * @param _owner NFT owner address
+   */
   function buyItem(
     address _nftAddress,
     uint256 _tokenId,
@@ -266,6 +294,15 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     emit ItemSold(_owner, msg.sender, _nftAddress, _tokenId, listedItem.quantity, _payToken, listedItem.pricePerItem);
   }
 
+  /**
+   * @notice Method of offering item
+   * @param _nftAddress Addres of NFT contract
+   * @param _tokenId Token ID of NFT
+   * @param _payToken Payment tokne addres
+   * @param _quantity Quantity of items
+   * @param _pricePerItem Price per item
+   * @param _deadline Offer expiration
+   */
   function createOffer(
     address _nftAddress,
     uint256 _tokenId,
@@ -296,12 +333,23 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     emit OfferCreated(msg.sender, _nftAddress, _tokenId, _quantity, address(_payToken), _pricePerItem, _deadline);
   }
 
+  /**
+   * @notice Method for canceling the offer
+   * @param _nftAddress Addres of NFT contract
+   * @param _tokenId Token ID of NFT
+   */
   function cancelOffer(address _nftAddress, uint256 _tokenId) external {
     delete (offers[_nftAddress][_tokenId][msg.sender]);
 
     emit OfferCanceled(msg.sender, _nftAddress, _tokenId);
   }
 
+  /**
+   * @notice Method for accepting the offer
+   * @param _nftAddress Addres of NFT contract
+   * @param _tokenId Token ID of NFT
+   * @param _creator Offer creator address
+   */
   function acceptOffer(
     address _nftAddress,
     uint256 _tokenId,
@@ -370,6 +418,10 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     return block.timestamp;
   }
 
+  /**
+   * @notice Validate the collection
+   * @param _nftAddress Collection address
+   */
   function _validCollection(address _nftAddress) internal view {
     require(
       (addressRegistry.tokenRegistry() != address(0) &&
@@ -378,6 +430,11 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     );
   }
 
+  /**
+   * @notice Validate the payment token
+   * @dev Zero address means the native token
+   * @param _payToken Payment token address
+   */
   function _validPayToken(address _payToken) internal view {
     require(
       _payToken == address(0) ||
@@ -387,18 +444,25 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     );
   }
 
+  /**
+   * @notice Validate the NFT owner and the quantity of the item
+   * @param _nftAddress Address of NFT contract
+   * @param _tokenId Token ID of NFT
+   * @param _owner NFT onwer address to validate
+   * @param _quantity Quantity of the item
+   */
   function _validOwner(
     address _nftAddress,
     uint256 _tokenId,
     address _owner,
-    uint256 quantity
+    uint256 _quantity
   ) internal view {
     if (IERC165Upgradeable(_nftAddress).supportsInterface(INTERFACE_ID_ERC721)) {
       IERC721Upgradeable nft = IERC721Upgradeable(_nftAddress);
       require(nft.ownerOf(_tokenId) == _owner, "not owning item");
     } else if (IERC165Upgradeable(_nftAddress).supportsInterface(INTERFACE_ID_ERC1155)) {
       IERC1155Upgradeable nft = IERC1155Upgradeable(_nftAddress);
-      require(nft.balanceOf(_owner, _tokenId) >= quantity, "not owning item");
+      require(nft.balanceOf(_owner, _tokenId) >= _quantity, "not owning item");
     } else {
       revert("invalid nft address");
     }
@@ -418,6 +482,14 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     emit ItemCanceled(_owner, _nftAddress, _tokenId);
   }
 
+  /**
+   * @notice Transfer tokens
+   * @dev If the _payToken address is zero, it means the native token
+   * @param _from Sender address
+   * @param _to Receiver address
+   * @param _payToken Payment token address
+   * @param _amount Payment token amount
+   */
   function _tokenTransferFrom(
     address _from,
     address _to,
