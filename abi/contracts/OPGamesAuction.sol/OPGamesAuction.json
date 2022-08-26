@@ -338,7 +338,7 @@
       },
       {
         "internalType": "bool",
-        "name": "minBidReserve",
+        "name": "_minBidReserve",
         "type": "bool"
       },
       {
