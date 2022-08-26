@@ -85,13 +85,26 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     platformFee = _platformFee;
   }
 
+  /**
+   * @notice Creates a new auction for a given item
+   * @dev Only the owner of item can create an auction and must have approved the contract
+   * @dev In addition to owning the item, the sender also has to have the MINTER role.
+   * @dev End time for the auction must be in the future.
+   * @param _nftAddress ERC 721 Address
+   * @param _tokenId Token ID of the item being auctioned
+   * @param _payToken Paying token
+   * @param _reservePrice Item cannot be sold for less than this or minBidIncrement, whichever is higher
+   * @param _startTimestamp Unix epoch in seconds for the auction start time
+   * @param _minBidReserve Whether the reserve price should be applied or not
+   * @param _endTimestamp Unix epoch in seconds for the auction end time.
+   */
   function createAuction(
     address _nftAddress,
     uint256 _tokenId,
     address _payToken,
     uint256 _reservePrice,
     uint256 _startTimestamp,
-    bool minBidReserve,
+    bool _minBidReserve,
     uint256 _endTimestamp
   ) external whenNotPaused {
     // Ensure this contract is approved to move the token
@@ -104,9 +117,17 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     _validCollection(_nftAddress);
     _validPayToken(_payToken);
 
-    _createAuction(_nftAddress, _tokenId, _payToken, _reservePrice, _startTimestamp, minBidReserve, _endTimestamp);
+    _createAuction(_nftAddress, _tokenId, _payToken, _reservePrice, _startTimestamp, _minBidReserve, _endTimestamp);
   }
 
+  /**
+   * @notice Places a new bid, out bidding the existing bidder if found and criteria is reached
+   * @dev Only callable when the auction is open
+   * @dev Bids from smart contracts are prohibited to prevent griefing with always reverting receiver
+   * @param _nftAddress ERC 721 Address
+   * @param _tokenId Token ID of the item being auctioned
+   * @param _bidAmount Bid amount
+   */
   function placeBid(
     address _nftAddress,
     uint256 _tokenId,
@@ -154,6 +175,12 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     emit BidPlaced(_nftAddress, _tokenId, msg.sender, _bidAmount);
   }
 
+  /**
+   * @notice Allows the hightest bidder to withdraw the bid (after 12 hours post auction's end) 
+   * @dev Only callable by the existing top bidder
+   * @param _nftAddress ERC 721 Address
+   * @param _tokenId Token ID of the item being auctioned
+   */
   function withdrawBid(address _nftAddress, uint256 _tokenId) external nonReentrant {
     HighestBid storage highestBid = highestBids[_nftAddress][_tokenId];
 
@@ -178,6 +205,14 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     emit BidWithdrawn(_nftAddress, _tokenId, msg.sender, previousBid);
   }
 
+  /**
+   * @notice Closes a finished auction and rewards the highest bidder
+   * @dev Only admin or smart contract
+   * @dev Auction can only be resulted if there has been a bidder and reserve met.
+   * @dev If there have been no bids, the auction needs to be cancelled instead using `cancelAuction()`
+   * @param _nftAddress ERC 721 Address
+   * @param _tokenId Token ID of the item being auctioned
+   */
   function resultAuction(address _nftAddress, uint256 _tokenId) external nonReentrant whenNotPaused {
     // Check the auction to see if it can be resulted
     Auction storage auction = auctions[_nftAddress][_tokenId];
@@ -233,6 +268,15 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     emit AuctionResulted(msg.sender, _nftAddress, _tokenId, winner, auction.payToken, winningBid);
   }
 
+  /**
+   * @notice Private method doing the heavy lifting of creating an auction
+   * @param _nftAddress ERC 721 Address
+   * @param _tokenId Token ID of the NFT being auctioned
+   * @param _payToken Paying token
+   * @param _reservePrice Item cannot be sold for less than this or minBidIncrement, whichever is higher
+   * @param _startTimestamp Unix epoch in seconds for the auction start time
+   * @param _endTimestamp Unix epoch in seconds for the auction end time.
+   */
   function _createAuction(
     address _nftAddress,
     uint256 _tokenId,
@@ -270,6 +314,12 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     emit AuctionCreated(_nftAddress, _tokenId, _payToken);
   }
 
+  /**
+   * @notice Cancels and inflight and un-resulted auctions, returning the funds to the top bidder if found
+   * @dev Only item owner
+   * @param _nftAddress ERC 721 Address
+   * @param _tokenId Token ID of the NFT being auctioned
+   */
   function cancelAuction(address _nftAddress, uint256 _tokenId) external nonReentrant {
     // Check valid and not resulted
     Auction memory auction = auctions[_nftAddress][_tokenId];
@@ -304,6 +354,11 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     emit AuctionCancelled(_nftAddress, _tokenId);
   }
 
+  /**
+   * @notice Used for sending back escrowed funds from a previous bid
+   * @param _currentHighestBidder Address of the last highest bidder
+   * @param _currentHighestBid Ether or Mona amount in WEI that the bidder sent when placing their bid
+   */
   function _refundHighestBidder(
     address _nftAddress,
     uint256 _tokenId,
@@ -317,6 +372,11 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     emit BidRefunded(_nftAddress, _tokenId, _currentHighestBidder, _currentHighestBid);
   }
 
+  /**
+   * @notice Validate the payment token
+   * @dev Zero address means the native token
+   * @param _payToken Payment token address
+   */
   function _validPayToken(address _payToken) internal view {
     require(
       _payToken == address(0) ||
@@ -326,6 +386,10 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     );
   }
 
+  /**
+   * @notice Validate the collection
+   * @param _nftAddress Collection address
+   */
   function _validCollection(address _nftAddress) internal view {
     require(
       (addressRegistry.tokenRegistry() != address(0) &&
@@ -334,6 +398,14 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     );
   }
 
+  /**
+   * @notice Transfer tokens
+   * @dev If the _payToken address is zero, it means the native token
+   * @param _from Sender address
+   * @param _to Receiver address
+   * @param _payToken Payment token address
+   * @param _amount Payment token amount
+   */
   function _tokenTransferFrom(
     address _from,
     address _to,
