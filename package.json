@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "@ethersproject/bignumber": "^5.3.0",
+    "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
     "dotenv": "^10.0.0"
   }
 }
