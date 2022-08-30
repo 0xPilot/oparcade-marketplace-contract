@@ -1,0 +1,409 @@
+{
+  "address": "0xd56e3F47781702624836aD9062650208E5Fe6c0E",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "oldAuction",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newAuction",
+          "type": "address"
+        }
+      ],
+      "name": "AuctionUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "oldMarketplace",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newMarketplace",
+          "type": "address"
+        }
+      ],
+      "name": "MarketplaceUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "oldTokenRegistry",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newTokenRegistry",
+          "type": "address"
+        }
+      ],
+      "name": "TokenRegistryUpdated",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "auction",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "initialize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "marketplace",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "tokenRegistry",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_auction",
+          "type": "address"
+        }
+      ],
+      "name": "updateAuction",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_marketplace",
+          "type": "address"
+        }
+      ],
+      "name": "updateMarketplace",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_tokenRegistry",
+          "type": "address"
+        }
+      ],
+      "name": "updateTokenRegistry",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x8891d4bdef7b52dbba0c5b808817634db02ae98f4989cd348061ccd3ff8c25d3",
+  "receipt": {
+    "to": null,
+    "from": "0x4039027048c08DCEdE2d912012308CE4F0F2bC68",
+    "contractAddress": "0xd56e3F47781702624836aD9062650208E5Fe6c0E",
+    "transactionIndex": 0,
+    "gasUsed": "518980",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000008000010000000000000000000000020000000000000000000008000000000000000000000000000000000000000000000000000000000800000000000000000000100000000080000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000004000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000004000000000000000000001000000000000000000000000000000100000001000000000000000000000000000000000000000000000000000000000000000100000",
+    "blockHash": "0x4be66a13d8cbabc9e6fb29f58b65ec2d6b995be6c0edf50aa8e111beafb4d53f",
+    "transactionHash": "0x8891d4bdef7b52dbba0c5b808817634db02ae98f4989cd348061ccd3ff8c25d3",
+    "logs": [
+      {
+        "transactionIndex": 0,
+        "blockNumber": 27831037,
+        "transactionHash": "0x8891d4bdef7b52dbba0c5b808817634db02ae98f4989cd348061ccd3ff8c25d3",
+        "address": "0x0000000000000000000000000000000000001010",
+        "topics": [
+          "0x4dfe1bbbcf077ddc3e01291eea2d5c70c2b422b415d95645b9adcfd678cb1d63",
+          "0x0000000000000000000000000000000000000000000000000000000000001010",
+          "0x0000000000000000000000004039027048c08dcede2d912012308ce4f0f2bc68",
+          "0x000000000000000000000000f903ba9e006193c1527bfbe65fe2123704ea3f99"
+        ],
+        "data": "0x0000000000000000000000000000000000000000000000000049c061e592e5e00000000000000000000000000000000000000000000000003bded07bb85936f100000000000000000000000000000000000000000000069e8ee05d90835e92bf0000000000000000000000000000000000000000000000003b951019d2c6511100000000000000000000000000000000000000000000069e8f2a1df268f1789f",
+        "logIndex": 0,
+        "blockHash": "0x4be66a13d8cbabc9e6fb29f58b65ec2d6b995be6c0edf50aa8e111beafb4d53f"
+      }
+    ],
+    "blockNumber": 27831037,
+    "cumulativeGasUsed": "518980",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "15b3947fd486810d5b6775035b1b066d",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.11+commit.d7f03943\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"by\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"oldAuction\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newAuction\",\"type\":\"address\"}],\"name\":\"AuctionUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"by\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"oldMarketplace\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newMarketplace\",\"type\":\"address\"}],\"name\":\"MarketplaceUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"by\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"oldTokenRegistry\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newTokenRegistry\",\"type\":\"address\"}],\"name\":\"TokenRegistryUpdated\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"auction\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"marketplace\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"tokenRegistry\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_auction\",\"type\":\"address\"}],\"name\":\"updateAuction\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_marketplace\",\"type\":\"address\"}],\"name\":\"updateMarketplace\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenRegistry\",\"type\":\"address\"}],\"name\":\"updateTokenRegistry\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.\"},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"},\"updateAuction(address)\":{\"details\":\"Only owner\",\"params\":{\"_auction\":\"new Auction contract address\"}},\"updateMarketplace(address)\":{\"details\":\"Only owner\",\"params\":{\"_marketplace\":\"new Marketplace contract address\"}},\"updateTokenRegistry(address)\":{\"details\":\"Only owner\",\"params\":{\"_tokenRegistry\":\"new TokenRegistry contract address\"}}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"auction()\":{\"notice\":\"Auction contract\"},\"marketplace()\":{\"notice\":\"Marketplace contract\"},\"tokenRegistry()\":{\"notice\":\"TokenRegistry contract\"},\"updateAuction(address)\":{\"notice\":\"Update Auction contract\"},\"updateMarketplace(address)\":{\"notice\":\"Update Marketplace contract\"},\"updateTokenRegistry(address)\":{\"notice\":\"Update TokenRegistry contract\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/AddressRegistry.sol\":\"AddressRegistry\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":800},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../utils/ContextUpgradeable.sol\\\";\\nimport \\\"../proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @dev Contract module which provides a basic access control mechanism, where\\n * there is an account (an owner) that can be granted exclusive access to\\n * specific functions.\\n *\\n * By default, the owner account will be the one that deploys the contract. This\\n * can later be changed with {transferOwnership}.\\n *\\n * This module is used through inheritance. It will make available the modifier\\n * `onlyOwner`, which can be applied to your functions to restrict their use to\\n * the owner.\\n */\\nabstract contract OwnableUpgradeable is Initializable, ContextUpgradeable {\\n    address private _owner;\\n\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\n\\n    /**\\n     * @dev Initializes the contract setting the deployer as the initial owner.\\n     */\\n    function __Ownable_init() internal initializer {\\n        __Context_init_unchained();\\n        __Ownable_init_unchained();\\n    }\\n\\n    function __Ownable_init_unchained() internal initializer {\\n        _setOwner(_msgSender());\\n    }\\n\\n    /**\\n     * @dev Returns the address of the current owner.\\n     */\\n    function owner() public view virtual returns (address) {\\n        return _owner;\\n    }\\n\\n    /**\\n     * @dev Throws if called by any account other than the owner.\\n     */\\n    modifier onlyOwner() {\\n        require(owner() == _msgSender(), \\\"Ownable: caller is not the owner\\\");\\n        _;\\n    }\\n\\n    /**\\n     * @dev Leaves the contract without owner. It will not be possible to call\\n     * `onlyOwner` functions anymore. Can only be called by the current owner.\\n     *\\n     * NOTE: Renouncing ownership will leave the contract without an owner,\\n     * thereby removing any functionality that is only available to the owner.\\n     */\\n    function renounceOwnership() public virtual onlyOwner {\\n        _setOwner(address(0));\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Can only be called by the current owner.\\n     */\\n    function transferOwnership(address newOwner) public virtual onlyOwner {\\n        require(newOwner != address(0), \\\"Ownable: new owner is the zero address\\\");\\n        _setOwner(newOwner);\\n    }\\n\\n    function _setOwner(address newOwner) private {\\n        address oldOwner = _owner;\\n        _owner = newOwner;\\n        emit OwnershipTransferred(oldOwner, newOwner);\\n    }\\n    uint256[49] private __gap;\\n}\\n\",\"keccak256\":\"0x35b09b69aca3bc2633da8f47382a81ecf367efe57167a2114f60f9ec81988afa\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev This is a base contract to aid in writing upgradeable contracts, or any kind of contract that will be deployed\\n * behind a proxy. Since a proxied contract can't have a constructor, it's common to move constructor logic to an\\n * external initializer function, usually called `initialize`. It then becomes necessary to protect this initializer\\n * function so it can only be called once. The {initializer} modifier provided by this contract will have this effect.\\n *\\n * TIP: To avoid leaving the proxy in an uninitialized state, the initializer function should be called as early as\\n * possible by providing the encoded function call as the `_data` argument to {ERC1967Proxy-constructor}.\\n *\\n * CAUTION: When used with inheritance, manual care must be taken to not invoke a parent initializer twice, or to ensure\\n * that all initializers are idempotent. This is not verified automatically as constructors are by Solidity.\\n */\\nabstract contract Initializable {\\n    /**\\n     * @dev Indicates that the contract has been initialized.\\n     */\\n    bool private _initialized;\\n\\n    /**\\n     * @dev Indicates that the contract is in the process of being initialized.\\n     */\\n    bool private _initializing;\\n\\n    /**\\n     * @dev Modifier to protect an initializer function from being invoked twice.\\n     */\\n    modifier initializer() {\\n        require(_initializing || !_initialized, \\\"Initializable: contract is already initialized\\\");\\n\\n        bool isTopLevelCall = !_initializing;\\n        if (isTopLevelCall) {\\n            _initializing = true;\\n            _initialized = true;\\n        }\\n\\n        _;\\n\\n        if (isTopLevelCall) {\\n            _initializing = false;\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x8b2abd85d0ece7e866e100e9d47ca9cbec93c87cf71a8d267b2b93eb81f7d5e9\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\nimport \\\"../proxy/utils/Initializable.sol\\\";\\n\\n/*\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract ContextUpgradeable is Initializable {\\n    function __Context_init() internal initializer {\\n        __Context_init_unchained();\\n    }\\n\\n    function __Context_init_unchained() internal initializer {\\n    }\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n    uint256[50] private __gap;\\n}\\n\",\"keccak256\":\"0x828a6fb02c79a63dc5867427f355c0a9c65b4359fecadae73883154da550f6f8\",\"license\":\"MIT\"},\"contracts/AddressRegistry.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.11;\\n\\nimport \\\"@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol\\\";\\nimport \\\"@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol\\\";\\n\\ncontract AddressRegistry is Initializable, OwnableUpgradeable {\\n  event TokenRegistryUpdated(address indexed by, address indexed oldTokenRegistry, address indexed newTokenRegistry);\\n  event MarketplaceUpdated(address indexed by, address indexed oldMarketplace, address indexed newMarketplace);\\n  event AuctionUpdated(address indexed by, address indexed oldAuction, address indexed newAuction);\\n\\n  /// @notice TokenRegistry contract\\n  address public tokenRegistry;\\n\\n  /// @notice Marketplace contract\\n  address public marketplace;\\n\\n  /// @notice Auction contract\\n  address public auction;\\n\\n  function initialize() external initializer {\\n    __Ownable_init();\\n  }\\n\\n  /**\\n   @notice Update TokenRegistry contract\\n   @dev Only owner\\n   @param _tokenRegistry new TokenRegistry contract address\\n   */\\n  function updateTokenRegistry(address _tokenRegistry) external onlyOwner {\\n    emit TokenRegistryUpdated(msg.sender, tokenRegistry, _tokenRegistry);\\n\\n    tokenRegistry = _tokenRegistry;\\n  }\\n\\n  /**\\n   @notice Update Marketplace contract\\n   @dev Only owner\\n   @param _marketplace new Marketplace contract address\\n   */\\n  function updateMarketplace(address _marketplace) external onlyOwner {\\n    emit MarketplaceUpdated(msg.sender, marketplace, _marketplace);\\n\\n    marketplace = _marketplace;\\n  }\\n\\n  /**\\n   @notice Update Auction contract\\n   @dev Only owner\\n   @param _auction new Auction contract address\\n   */\\n  function updateAuction(address _auction) external onlyOwner {\\n    emit AuctionUpdated(msg.sender, auction, _auction);\\n\\n    auction = _auction;\\n  }\\n}\\n\",\"keccak256\":\"0xb158613db975e50e4c8f114f579e2ef085150acd4337c2e5ae151596971be1dd\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b5061086e806100206000396000f3fe608060405234801561001057600080fd5b50600436106100be5760003560e01c80638da5cb5b11610076578063abc8c7af1161005b578063abc8c7af1461014e578063eb63631714610161578063f2fde38b1461017457600080fd5b80638da5cb5b1461012a5780639d23c4c71461013b57600080fd5b8063715018a6116100a7578063715018a6146100eb5780637d9f6db5146100f35780638129fc1c1461012257600080fd5b80631fa915a4146100c35780633402a036146100d8575b600080fd5b6100d66100d1366004610808565b610187565b005b6100d66100e6366004610808565b610244565b6100d66102fc565b606754610106906001600160a01b031681565b6040516001600160a01b03909116815260200160405180910390f35b6100d6610362565b6033546001600160a01b0316610106565b606554610106906001600160a01b031681565b606654610106906001600160a01b031681565b6100d661016f366004610808565b61041d565b6100d6610182366004610808565b6104d5565b6033546001600160a01b031633146101e65760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064015b60405180910390fd5b6065546040516001600160a01b0380841692169033907fb930976fe3861b681d9ff47fd2a0cd7631c018a3e76b25a945098e35e59c8ad690600090a4606580546001600160a01b0319166001600160a01b0392909216919091179055565b6033546001600160a01b0316331461029e5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064016101dd565b6067546040516001600160a01b0380841692169033907f73a9d4110d133bbfcf7eeaf5b7f246b20c7261b4605fb3c258c369b44f2c531b90600090a4606780546001600160a01b0319166001600160a01b0392909216919091179055565b6033546001600160a01b031633146103565760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064016101dd565b61036060006105b0565b565b600054610100900460ff168061037b575060005460ff16155b6103de5760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201526d191e481a5b9a5d1a585b1a5e995960921b60648201526084016101dd565b600054610100900460ff16158015610400576000805461ffff19166101011790555b610408610602565b801561041a576000805461ff00191690555b50565b6033546001600160a01b031633146104775760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064016101dd565b6066546040516001600160a01b0380841692169033907f5b5fc503cf9db0d063132c1cb9b1a6d33eb0d8ff12f1385782d65ee363d66d0d90600090a4606680546001600160a01b0319166001600160a01b0392909216919091179055565b6033546001600160a01b0316331461052f5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064016101dd565b6001600160a01b0381166105ab5760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201527f646472657373000000000000000000000000000000000000000000000000000060648201526084016101dd565b61041a815b603380546001600160a01b038381166001600160a01b0319831681179093556040519116919082907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e090600090a35050565b600054610100900460ff168061061b575060005460ff16155b61067e5760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201526d191e481a5b9a5d1a585b1a5e995960921b60648201526084016101dd565b600054610100900460ff161580156106a0576000805461ffff19166101011790555b6106a86106b0565b610408610761565b600054610100900460ff16806106c9575060005460ff16155b61072c5760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201526d191e481a5b9a5d1a585b1a5e995960921b60648201526084016101dd565b600054610100900460ff16158015610408576000805461ffff1916610101179055801561041a576000805461ff001916905550565b600054610100900460ff168061077a575060005460ff16155b6107dd5760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201526d191e481a5b9a5d1a585b1a5e995960921b60648201526084016101dd565b600054610100900460ff161580156107ff576000805461ffff19166101011790555b610408336105b0565b60006020828403121561081a57600080fd5b81356001600160a01b038116811461083157600080fd5b939250505056fea2646970667358221220f50b0e67d473c17919fd6876a4da292520cc15bcf52fc698829d8538852c66c264736f6c634300080b0033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100be5760003560e01c80638da5cb5b11610076578063abc8c7af1161005b578063abc8c7af1461014e578063eb63631714610161578063f2fde38b1461017457600080fd5b80638da5cb5b1461012a5780639d23c4c71461013b57600080fd5b8063715018a6116100a7578063715018a6146100eb5780637d9f6db5146100f35780638129fc1c1461012257600080fd5b80631fa915a4146100c35780633402a036146100d8575b600080fd5b6100d66100d1366004610808565b610187565b005b6100d66100e6366004610808565b610244565b6100d66102fc565b606754610106906001600160a01b031681565b6040516001600160a01b03909116815260200160405180910390f35b6100d6610362565b6033546001600160a01b0316610106565b606554610106906001600160a01b031681565b606654610106906001600160a01b031681565b6100d661016f366004610808565b61041d565b6100d6610182366004610808565b6104d5565b6033546001600160a01b031633146101e65760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064015b60405180910390fd5b6065546040516001600160a01b0380841692169033907fb930976fe3861b681d9ff47fd2a0cd7631c018a3e76b25a945098e35e59c8ad690600090a4606580546001600160a01b0319166001600160a01b0392909216919091179055565b6033546001600160a01b0316331461029e5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064016101dd565b6067546040516001600160a01b0380841692169033907f73a9d4110d133bbfcf7eeaf5b7f246b20c7261b4605fb3c258c369b44f2c531b90600090a4606780546001600160a01b0319166001600160a01b0392909216919091179055565b6033546001600160a01b031633146103565760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064016101dd565b61036060006105b0565b565b600054610100900460ff168061037b575060005460ff16155b6103de5760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201526d191e481a5b9a5d1a585b1a5e995960921b60648201526084016101dd565b600054610100900460ff16158015610400576000805461ffff19166101011790555b610408610602565b801561041a576000805461ff00191690555b50565b6033546001600160a01b031633146104775760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064016101dd565b6066546040516001600160a01b0380841692169033907f5b5fc503cf9db0d063132c1cb9b1a6d33eb0d8ff12f1385782d65ee363d66d0d90600090a4606680546001600160a01b0319166001600160a01b0392909216919091179055565b6033546001600160a01b0316331461052f5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064016101dd565b6001600160a01b0381166105ab5760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201527f646472657373000000000000000000000000000000000000000000000000000060648201526084016101dd565b61041a815b603380546001600160a01b038381166001600160a01b0319831681179093556040519116919082907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e090600090a35050565b600054610100900460ff168061061b575060005460ff16155b61067e5760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201526d191e481a5b9a5d1a585b1a5e995960921b60648201526084016101dd565b600054610100900460ff161580156106a0576000805461ffff19166101011790555b6106a86106b0565b610408610761565b600054610100900460ff16806106c9575060005460ff16155b61072c5760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201526d191e481a5b9a5d1a585b1a5e995960921b60648201526084016101dd565b600054610100900460ff16158015610408576000805461ffff1916610101179055801561041a576000805461ff001916905550565b600054610100900460ff168061077a575060005460ff16155b6107dd5760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201526d191e481a5b9a5d1a585b1a5e995960921b60648201526084016101dd565b600054610100900460ff161580156107ff576000805461ffff19166101011790555b610408336105b0565b60006020828403121561081a57600080fd5b81356001600160a01b038116811461083157600080fd5b939250505056fea2646970667358221220f50b0e67d473c17919fd6876a4da292520cc15bcf52fc698829d8538852c66c264736f6c634300080b0033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "owner()": {
+        "details": "Returns the address of the current owner."
+      },
+      "renounceOwnership()": {
+        "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner."
+      },
+      "transferOwnership(address)": {
+        "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+      },
+      "updateAuction(address)": {
+        "details": "Only owner",
+        "params": {
+          "_auction": "new Auction contract address"
+        }
+      },
+      "updateMarketplace(address)": {
+        "details": "Only owner",
+        "params": {
+          "_marketplace": "new Marketplace contract address"
+        }
+      },
+      "updateTokenRegistry(address)": {
+        "details": "Only owner",
+        "params": {
+          "_tokenRegistry": "new TokenRegistry contract address"
+        }
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "auction()": {
+        "notice": "Auction contract"
+      },
+      "marketplace()": {
+        "notice": "Marketplace contract"
+      },
+      "tokenRegistry()": {
+        "notice": "TokenRegistry contract"
+      },
+      "updateAuction(address)": {
+        "notice": "Update Auction contract"
+      },
+      "updateMarketplace(address)": {
+        "notice": "Update Marketplace contract"
+      },
+      "updateTokenRegistry(address)": {
+        "notice": "Update TokenRegistry contract"
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 130,
+        "contract": "contracts/AddressRegistry.sol:AddressRegistry",
+        "label": "_initialized",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_bool"
+      },
+      {
+        "astId": 133,
+        "contract": "contracts/AddressRegistry.sol:AddressRegistry",
+        "label": "_initializing",
+        "offset": 1,
+        "slot": "0",
+        "type": "t_bool"
+      },
+      {
+        "astId": 1167,
+        "contract": "contracts/AddressRegistry.sol:AddressRegistry",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_array(t_uint256)50_storage"
+      },
+      {
+        "astId": 10,
+        "contract": "contracts/AddressRegistry.sol:AddressRegistry",
+        "label": "_owner",
+        "offset": 0,
+        "slot": "51",
+        "type": "t_address"
+      },
+      {
+        "astId": 123,
+        "contract": "contracts/AddressRegistry.sol:AddressRegistry",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "52",
+        "type": "t_array(t_uint256)49_storage"
+      },
+      {
+        "astId": 1215,
+        "contract": "contracts/AddressRegistry.sol:AddressRegistry",
+        "label": "tokenRegistry",
+        "offset": 0,
+        "slot": "101",
+        "type": "t_address"
+      },
+      {
+        "astId": 1218,
+        "contract": "contracts/AddressRegistry.sol:AddressRegistry",
+        "label": "marketplace",
+        "offset": 0,
+        "slot": "102",
+        "type": "t_address"
+      },
+      {
+        "astId": 1221,
+        "contract": "contracts/AddressRegistry.sol:AddressRegistry",
+        "label": "auction",
+        "offset": 0,
+        "slot": "103",
+        "type": "t_address"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_uint256)49_storage": {
+        "base": "t_uint256",
+        "encoding": "inplace",
+        "label": "uint256[49]",
+        "numberOfBytes": "1568"
+      },
+      "t_array(t_uint256)50_storage": {
+        "base": "t_uint256",
+        "encoding": "inplace",
+        "label": "uint256[50]",
+        "numberOfBytes": "1600"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}
