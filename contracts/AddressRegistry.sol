@@ -28,6 +28,8 @@ contract AddressRegistry is Initializable, OwnableUpgradeable {
    @param _tokenRegistry new TokenRegistry contract address
    */
   function updateTokenRegistry(address _tokenRegistry) external onlyOwner {
+    require(_tokenRegistry != address(0), "!TokenRegistry");
+
     emit TokenRegistryUpdated(msg.sender, tokenRegistry, _tokenRegistry);
 
     tokenRegistry = _tokenRegistry;
@@ -39,6 +41,8 @@ contract AddressRegistry is Initializable, OwnableUpgradeable {
    @param _marketplace new Marketplace contract address
    */
   function updateMarketplace(address _marketplace) external onlyOwner {
+    require(_marketplace != address(0), "!Marketplace");
+
     emit MarketplaceUpdated(msg.sender, marketplace, _marketplace);
 
     marketplace = _marketplace;
@@ -50,6 +54,8 @@ contract AddressRegistry is Initializable, OwnableUpgradeable {
    @param _auction new Auction contract address
    */
   function updateAuction(address _auction) external onlyOwner {
+    require(_auction != address(0), "!Auction");
+
     emit AuctionUpdated(msg.sender, auction, _auction);
 
     auction = _auction;
