@@ -278,9 +278,12 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
     // Transfer token to owner
     if (_payToken == address(0)) {
       require(msg.value == price, "insufficient Ether to buy");
+      _tokenTransferFrom(address(this), feeRecipient, _payToken, feeAmount);
+      _tokenTransferFrom(address(this), _owner, _payToken, price - feeAmount);
+    } else {
+      _tokenTransferFrom(msg.sender, feeRecipient, _payToken, feeAmount);
+      _tokenTransferFrom(msg.sender, _owner, _payToken, price - feeAmount);
     }
-    _tokenTransferFrom(msg.sender, feeRecipient, _payToken, feeAmount);
-    _tokenTransferFrom(msg.sender, _owner, _payToken, price - feeAmount);
 
     // Transfer NFT to buyer
     if (IERC165Upgradeable(_nftAddress).supportsInterface(INTERFACE_ID_ERC721)) {
