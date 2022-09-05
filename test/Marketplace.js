@@ -17,6 +17,7 @@ describe("Marketplace", () => {
 
   const ZERO_ADDRESS = ethers.constants.AddressZero;
   const pricePerItem = ethers.utils.parseEther("1");
+  const newPrice = ethers.utils.parseEther("2");
 
   const firstTokenId = 1;
   const secondTokenId = 2;
@@ -124,6 +125,59 @@ describe("Marketplace", () => {
           pricePerItem,
           await getCurrentBlockTimestamp(),
         );
+    });
+  });
+
+  describe("cancelListing", () => {
+    beforeEach(async () => {
+      await tokenRegistry.addCollection(mockERC721.address);
+      await mockERC721.connect(minter).setApprovalForAll(marketplace.address, true);
+      await marketplace
+        .connect(minter)
+        .listItem(mockERC721.address, firstTokenId, 1, ZERO_ADDRESS, pricePerItem, await getCurrentBlockTimestamp());
+    });
+
+    it("Should revert if the item is not listed", async () => {
+      await expect(marketplace.cancelListing(mockERC721.address, secondTokenId)).to.be.revertedWith("not listed item");
+    });
+
+    it("Should revert if not owning the item", async () => {
+      await mockERC721.connect(minter).transferFrom(minter.address, owner.address, firstTokenId);
+      await expect(marketplace.connect(minter).cancelListing(mockERC721.address, firstTokenId)).to.be.revertedWith(
+        "not owning item",
+      );
+    });
+
+    it("Should cancel the listed item", async () => {
+      await marketplace.connect(minter).cancelListing(mockERC721.address, firstTokenId);
+    });
+  });
+
+  describe("updateListing", () => {
+    beforeEach(async () => {
+      await tokenRegistry.addCollection(mockERC721.address);
+      await mockERC721.connect(minter).setApprovalForAll(marketplace.address, true);
+      await marketplace
+        .connect(minter)
+        .listItem(mockERC721.address, firstTokenId, 1, ZERO_ADDRESS, pricePerItem, await getCurrentBlockTimestamp());
+    });
+
+    it("Should revert if the item is not listed", async () => {
+      await expect(
+        marketplace.updateListing(mockERC721.address, secondTokenId, mockERC20.address, newPrice),
+      ).to.be.revertedWith("not listed item");
+    });
+
+    it("Should revert if not owning the item", async () => {
+      await mockERC721.connect(minter).transferFrom(minter.address, owner.address, firstTokenId);
+      await expect(
+        marketplace.connect(minter).updateListing(mockERC721.address, firstTokenId, mockERC20.address, newPrice),
+      ).to.be.revertedWith("not owning item");
+    });
+
+    it("Should update the item", async () => {
+      await tokenRegistry.addPayToken(mockERC20.address);
+      await marketplace.connect(minter).updateListing(mockERC721.address, firstTokenId, mockERC20.address, newPrice);
     });
   });
 });
