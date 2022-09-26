@@ -180,4 +180,63 @@ describe("Marketplace", () => {
       await marketplace.connect(minter).updateListing(mockERC721.address, firstTokenId, mockERC20.address, newPrice);
     });
   });
+
+  describe("buyItem", () => {
+    beforeEach(async () => {
+      await tokenRegistry.addCollection(mockERC721.address);
+      await mockERC721.connect(minter).setApprovalForAll(marketplace.address, true);
+      await marketplace
+        .connect(minter)
+        .listItem(mockERC721.address, firstTokenId, 1, ZERO_ADDRESS, pricePerItem, await getCurrentBlockTimestamp());
+    });
+
+    it("Should revert if the seller doesn't own the item", async () => {
+      await mockERC721.connect(minter).transferFrom(minter.address, owner.address, firstTokenId);
+      await expect(
+        marketplace
+          .connect(buyer)
+          .buyItem(mockERC721.address, firstTokenId, ZERO_ADDRESS, minter.address, { value: pricePerItem }),
+      ).to.be.revertedWith("not owning item");
+    });
+
+    it("Should revert when buying before the scheduled time", async () => {
+      await mockERC721.setApprovalForAll(marketplace.address, true);
+      await marketplace.listItem(
+        mockERC721.address,
+        secondTokenId,
+        1,
+        ZERO_ADDRESS,
+        pricePerItem,
+        ethers.constants.MaxUint256,
+      );
+
+      await expect(
+        marketplace
+          .connect(buyer)
+          .buyItem(mockERC721.address, secondTokenId, ZERO_ADDRESS, owner.address, { value: pricePerItem }),
+      ).to.be.revertedWith("item not buyable");
+    });
+
+    it("Should revert if the amount is not enough", async () => {
+      await expect(
+        marketplace.connect(buyer).buyItem(mockERC721.address, firstTokenId, ZERO_ADDRESS, minter.address),
+      ).to.be.revertedWith("insufficient Ether to buy");
+    });
+
+    it("Should buy the item", async () => {
+      const feeRecipientBalanceBefore = await feeRecipient.getBalance();
+      const minterBalanceBefore = await minter.getBalance();
+
+      await marketplace
+        .connect(buyer)
+        .buyItem(mockERC721.address, firstTokenId, ZERO_ADDRESS, minter.address, { value: pricePerItem });
+
+      const feeRecipientBalanceAfter = await feeRecipient.getBalance();
+      const minterBalanceAfter = await minter.getBalance();
+      expect(feeRecipientBalanceAfter.sub(feeRecipientBalanceBefore)).to.be.equal(
+        pricePerItem.mul(platformFee).div(1000),
+      );
+      expect(minterBalanceAfter.sub(minterBalanceBefore)).to.be.equal(pricePerItem.mul(1000 - platformFee).div(1000));
+    });
+  });
 });
