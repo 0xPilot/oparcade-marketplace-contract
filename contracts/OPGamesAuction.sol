@@ -54,7 +54,7 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
   mapping(address => mapping(uint256 => HighestBid)) public highestBids;
 
   /// @notice globally and across all auctions, the amount by which a bid has to increase
-  uint256 public minBidIncrement = 1;
+  uint256 public minBidIncrement;
 
   /// @notice Platform fee recipient
   address payable public feeRecipient;
@@ -83,6 +83,7 @@ contract OPGamesAuction is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     addressRegistry = IAddressRegistry(_addressRegistry);
     feeRecipient = _feeRecipient;
     platformFee = _platformFee;
+    minBidIncrement = 1;
   }
 
   /**
