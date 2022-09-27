@@ -13,7 +13,7 @@ const getCurrentBlockTimestamp = async () => {
 };
 
 describe("Marketplace", () => {
-  let marketplace;
+  let marketplace, auction;
 
   const ZERO_ADDRESS = ethers.constants.AddressZero;
   const pricePerItem = ethers.utils.parseEther("1");
@@ -38,6 +38,10 @@ describe("Marketplace", () => {
     const Marketplace = await ethers.getContractFactory("OPGamesMarketplace");
     marketplace = await upgrades.deployProxy(Marketplace, [addressRegistry.address, feeRecipient.address, platformFee]);
 
+    // Initialize Auction contract
+    const Auction = await ethers.getContractFactory("OPGamesAuction");
+    auction = await upgrades.deployProxy(Auction, [addressRegistry.address, feeRecipient.address, platformFee]);
+
     // deploy mock ERC20 token
     const ERC20Mock = await ethers.getContractFactory("ERC20Mock");
     mockERC20 = await ERC20Mock.deploy("mockToken", "mockToken");
@@ -49,10 +53,14 @@ describe("Marketplace", () => {
     // Register the contract addresses
     await addressRegistry.updateTokenRegistry(tokenRegistry.address);
     await addressRegistry.updateMarketplace(marketplace.address);
+    await addressRegistry.updateAuction(auction.address);
 
     // Mint NFTs
     await mockERC721.mint(minter.address, 1);
     await mockERC721.mint(owner.address, 2);
+
+    // Transfer ERC20 tokens
+    await mockERC20.transfer(buyer.address, pricePerItem.mul(10000));
   });
 
   describe("listItem", () => {
@@ -237,6 +245,128 @@ describe("Marketplace", () => {
         pricePerItem.mul(platformFee).div(1000),
       );
       expect(minterBalanceAfter.sub(minterBalanceBefore)).to.be.equal(pricePerItem.mul(1000 - platformFee).div(1000));
+    });
+  });
+
+  describe("createOffer", () => {
+    beforeEach(async () => {
+      await tokenRegistry.addCollection(mockERC721.address);
+      await tokenRegistry.addPayToken(mockERC20.address);
+    });
+
+    it("Should revert if the item is not an NFT", async () => {
+      await expect(
+        marketplace
+          .connect(buyer)
+          .createOffer(
+            mockERC20.address,
+            firstTokenId,
+            mockERC20.address,
+            1,
+            100,
+            (await getCurrentBlockTimestamp()) + 300,
+          ),
+      ).to.be.revertedWith("invalid nft address");
+    });
+
+    it("Should revert if the item is on the auction", async () => {
+      const currentTime = await getCurrentBlockTimestamp();
+      await mockERC721.connect(minter).setApprovalForAll(auction.address, true);
+      await auction
+        .connect(minter)
+        .createAuction(
+          mockERC721.address,
+          firstTokenId,
+          mockERC20.address,
+          100,
+          currentTime + 100,
+          false,
+          currentTime + 500,
+        );
+
+      await expect(
+        marketplace
+          .connect(buyer)
+          .createOffer(
+            mockERC721.address,
+            firstTokenId,
+            mockERC20.address,
+            1,
+            100,
+            (await getCurrentBlockTimestamp()) + 300,
+          ),
+      ).to.be.revertedWith("cannot place an offer if auction is going on");
+    });
+
+    it("Should revert if the deadline is expired", async () => {
+      await expect(
+        marketplace
+          .connect(buyer)
+          .createOffer(
+            mockERC721.address,
+            firstTokenId,
+            mockERC20.address,
+            1,
+            100,
+            (await getCurrentBlockTimestamp()) - 300,
+          ),
+      ).to.be.revertedWith("invalid expiration");
+    });
+
+    it("Should revert if the native token is offered", async () => {
+      await expect(
+        marketplace
+          .connect(buyer)
+          .createOffer(
+            mockERC721.address,
+            firstTokenId,
+            ZERO_ADDRESS,
+            1,
+            100,
+            (await getCurrentBlockTimestamp()) + 300,
+          ),
+      ).to.be.revertedWith("disabled native token");
+    });
+
+    it("Should create an offer", async () => {
+      await marketplace
+        .connect(buyer)
+        .createOffer(
+          mockERC721.address,
+          firstTokenId,
+          mockERC20.address,
+          1,
+          100,
+          (await getCurrentBlockTimestamp()) + 300,
+        );
+    });
+  });
+
+  describe("cancelOffer", () => {
+    beforeEach(async () => {
+      await tokenRegistry.addCollection(mockERC721.address);
+      await tokenRegistry.addPayToken(mockERC20.address);
+
+      await marketplace
+        .connect(buyer)
+        .createOffer(
+          mockERC721.address,
+          firstTokenId,
+          mockERC20.address,
+          1,
+          100,
+          (await getCurrentBlockTimestamp()) + 300,
+        );
+    });
+
+    it("Should cancel the offer", async () => {
+      let offer = await marketplace.offers(mockERC721.address, firstTokenId, buyer.address);
+      expect(offer.payToken).to.be.equal(mockERC20.address);
+
+      await marketplace.connect(buyer).cancelOffer(mockERC721.address, firstTokenId);
+
+      offer = await marketplace.offers(mockERC721.address, firstTokenId, buyer.address);
+      expect(offer.payToken).to.be.equal(ZERO_ADDRESS);
     });
   });
 });
