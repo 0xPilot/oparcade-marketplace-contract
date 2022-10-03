@@ -347,6 +347,7 @@ describe("Marketplace", () => {
       await tokenRegistry.addCollection(mockERC721.address);
       await tokenRegistry.addPayToken(mockERC20.address);
 
+      await mockERC20.connect(buyer).approve(marketplace.address, 100);
       await marketplace
         .connect(buyer)
         .createOffer(
@@ -367,6 +368,37 @@ describe("Marketplace", () => {
 
       offer = await marketplace.offers(mockERC721.address, firstTokenId, buyer.address);
       expect(offer.payToken).to.be.equal(ZERO_ADDRESS);
+    });
+  });
+
+  describe("acceptOffer", () => {
+    beforeEach(async () => {
+      await tokenRegistry.addCollection(mockERC721.address);
+      await tokenRegistry.addPayToken(mockERC20.address);
+
+      await mockERC20.connect(buyer).approve(marketplace.address, 100);
+      await marketplace
+        .connect(buyer)
+        .createOffer(
+          mockERC721.address,
+          firstTokenId,
+          mockERC20.address,
+          1,
+          100,
+          (await getCurrentBlockTimestamp()) + 300,
+        );
+    });
+
+    it("Should revert if the offer is accepted by non NFT owner", async () => {
+      await mockERC721.connect(minter).setApprovalForAll(marketplace.address, true);
+      await expect(marketplace.acceptOffer(mockERC721.address, firstTokenId, buyer.address)).to.be.revertedWith(
+        "not owning item",
+      );
+    });
+
+    it("Should accept the offer", async () => {
+      await mockERC721.connect(minter).setApprovalForAll(marketplace.address, true);
+      await marketplace.connect(minter).acceptOffer(mockERC721.address, firstTokenId, buyer.address);
     });
   });
 });
