@@ -322,7 +322,7 @@ contract OPGamesMarketplace is Initializable, OwnableUpgradeable, ReentrancyGuar
 
     IOPGamesAuction auction = IOPGamesAuction(addressRegistry.auction());
 
-    (, , , uint256 startTime, , bool resulted) = auction.auctions(_nftAddress, _tokenId);
+    (, , , , uint256 startTime, , bool resulted) = auction.auctions(_nftAddress, _tokenId);
 
     require(startTime == 0 || resulted == true, "cannot place an offer if auction is going on");
 

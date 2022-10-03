@@ -11,6 +11,7 @@ interface IOPGamesAuction {
       uint256,
       uint256,
       uint256,
+      uint256,
       bool
     );
 }
