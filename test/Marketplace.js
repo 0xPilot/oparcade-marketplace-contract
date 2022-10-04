@@ -52,7 +52,7 @@ describe("Marketplace", () => {
 
     // deploy mockERC1155 token
     const MockERC1155 = await ethers.getContractFactory("MockERC1155");
-    mockERC1155 = await mockERC1155.deploy();
+    mockERC1155 = await MockERC1155.deploy();
 
     // Register the contract addresses
     await addressRegistry.updateTokenRegistry(tokenRegistry.address);
