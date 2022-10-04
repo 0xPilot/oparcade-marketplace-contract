@@ -50,6 +50,10 @@ describe("Marketplace", () => {
     const MockERC721 = await ethers.getContractFactory("MockERC721");
     mockERC721 = await MockERC721.deploy();
 
+    // deploy mockERC1155 token
+    const MockERC1155 = await ethers.getContractFactory("MockERC1155");
+    mockERC1155 = await mockERC1155.deploy();
+
     // Register the contract addresses
     await addressRegistry.updateTokenRegistry(tokenRegistry.address);
     await addressRegistry.updateMarketplace(marketplace.address);
@@ -399,6 +403,53 @@ describe("Marketplace", () => {
     it("Should accept the offer", async () => {
       await mockERC721.connect(minter).setApprovalForAll(marketplace.address, true);
       await marketplace.connect(minter).acceptOffer(mockERC721.address, firstTokenId, buyer.address);
+    });
+  });
+
+  describe("updatePlatformFee", () => {
+    it("Should revert if the platform fee is equal to / greater than 100_0", async () => {
+      const platformFee = 1000;
+      await expect(marketplace.updatePlatformFee(platformFee)).to.be.revertedWith("platform fee exceeded");
+    });
+
+    it("Should update the platform fee", async () => {
+      const oldPlatformFee = await marketplace.platformFee();
+
+      const platformFee = 150;
+      await marketplace.updatePlatformFee(platformFee);
+
+      expect(await marketplace.platformFee()).to.equal(platformFee);
+    });
+  });
+
+  describe("updatePlatformFeeRecipient", () => {
+    it("Should revert if the platform fee recipient address is address(0)", async () => {
+      const feeRecipient = ZERO_ADDRESS;
+      await expect(marketplace.updatePlatformFeeRecipient(feeRecipient)).to.be.revertedWith("unexpected fee recipient");
+    });
+
+    it("Should update the platform fee recipient address", async () => {
+      const feeRecipient = await marketplace.feeRecipient();
+
+      await marketplace.updatePlatformFeeRecipient(buyer.address);
+
+      expect(await marketplace.feeRecipient()).to.equal(buyer.address);
+    });
+  });
+
+  describe("pause/unpause", () => {
+    it("Should pause Oparcade", async () => {
+      await marketplace.pause();
+
+      expect(await marketplace.paused()).to.be.true;
+    });
+    it("Should unpause(resume) Oparcade", async () => {
+      await marketplace.pause();
+      expect(await marketplace.paused()).to.be.true;
+
+      await marketplace.unpause();
+
+      expect(await marketplace.paused()).to.be.false;
     });
   });
 });
