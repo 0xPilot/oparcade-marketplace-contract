@@ -138,6 +138,20 @@ describe("Marketplace", () => {
           await getCurrentBlockTimestamp(),
         );
     });
+
+    it("Should revert if already listed", async () => {
+      await tokenRegistry.addCollection(mockERC721.address);
+      await mockERC721.connect(minter).setApprovalForAll(marketplace.address, true);
+      await marketplace
+        .connect(minter)
+        .listItem(mockERC721.address, firstTokenId, 1, ZERO_ADDRESS, pricePerItem, await getCurrentBlockTimestamp());
+
+      await expect(
+        marketplace
+          .connect(minter)
+          .listItem(mockERC721.address, firstTokenId, 1, ZERO_ADDRESS, pricePerItem, await getCurrentBlockTimestamp()),
+      ).to.be.revertedWith("already listed");
+    });
   });
 
   describe("cancelListing", () => {
@@ -344,6 +358,32 @@ describe("Marketplace", () => {
           (await getCurrentBlockTimestamp()) + 300,
         );
     });
+
+    it("Should revert if the offer already exists", async () => {
+      await marketplace
+        .connect(buyer)
+        .createOffer(
+          mockERC721.address,
+          firstTokenId,
+          mockERC20.address,
+          1,
+          100,
+          (await getCurrentBlockTimestamp()) + 300,
+        );
+
+      await expect(
+        marketplace
+          .connect(buyer)
+          .createOffer(
+            mockERC721.address,
+            firstTokenId,
+            mockERC20.address,
+            1,
+            100,
+            (await getCurrentBlockTimestamp()) + 300,
+          ),
+      ).to.be.revertedWith("offer already created");
+    });
   });
 
   describe("cancelOffer", () => {
@@ -403,6 +443,20 @@ describe("Marketplace", () => {
     it("Should accept the offer", async () => {
       await mockERC721.connect(minter).setApprovalForAll(marketplace.address, true);
       await marketplace.connect(minter).acceptOffer(mockERC721.address, firstTokenId, buyer.address);
+    });
+
+    it("Should revert if the offer not exist or expired", async () => {
+      // offer doesn't exist
+      await mockERC721.connect(minter).setApprovalForAll(marketplace.address, true);
+      await expect(
+        marketplace.connect(minter).acceptOffer(mockERC721.address, secondTokenId, buyer.address),
+      ).to.be.revertedWith("offer not exists or expired");
+
+      // offer was expired
+      await increaseTime(350);
+      await expect(
+        marketplace.connect(minter).acceptOffer(mockERC721.address, firstTokenId, buyer.address),
+      ).to.be.revertedWith("offer not exists or expired");
     });
   });
 
