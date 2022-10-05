@@ -13,7 +13,7 @@ const getCurrentBlockTimestamp = async () => {
 };
 
 describe("Marketplace", () => {
-  let marketplace, auction;
+  let addressRegistry, tokenRegistry, marketplace, auction;
 
   const ZERO_ADDRESS = ethers.constants.AddressZero;
   const pricePerItem = ethers.utils.parseEther("1");
@@ -63,8 +63,34 @@ describe("Marketplace", () => {
     await mockERC721.mint(minter.address, 1);
     await mockERC721.mint(owner.address, 2);
 
+    await mockERC1155.mint(minter.address, [1, 2, 3], [10, 10, 10]);
+    await mockERC1155.mint(owner.address, [4, 5, 6], [10, 10, 10]);
+
     // Transfer ERC20 tokens
     await mockERC20.transfer(buyer.address, pricePerItem.mul(10000));
+  });
+
+  describe("initialize", () => {
+    it("Should revert if addressRegistry is address(0)", async () => {
+      const Marketplace = await ethers.getContractFactory("OPGamesMarketplace");
+      await expect(
+        upgrades.deployProxy(Marketplace, [ZERO_ADDRESS, feeRecipient.address, platformFee]),
+      ).to.be.revertedWith("unexpected address registry");
+    });
+
+    it("Should revert if fee recipient address is address(0)", async () => {
+      const Marketplace = await ethers.getContractFactory("OPGamesMarketplace");
+      await expect(
+        upgrades.deployProxy(Marketplace, [addressRegistry.address, ZERO_ADDRESS, platformFee]),
+      ).to.be.revertedWith("unexpected fee recipient");
+    });
+
+    it("Should revert if platform fee is equal to / greater than 1000", async () => {
+      const Marketplace = await ethers.getContractFactory("OPGamesMarketplace");
+      await expect(
+        upgrades.deployProxy(Marketplace, [addressRegistry.address, feeRecipient.address, 1000]),
+      ).to.be.revertedWith("platform fee exceeded");
+    });
   });
 
   describe("listItem", () => {
@@ -87,6 +113,44 @@ describe("Marketplace", () => {
           .connect(minter)
           .listItem(mockERC721.address, firstTokenId, 1, ZERO_ADDRESS, pricePerItem, await getCurrentBlockTimestamp()),
       ).to.be.revertedWith("item not approved");
+    });
+
+    it("Should revert if not hold the enough NFTs (ERC1155)", async () => {
+      await expect(
+        marketplace
+          .connect(minter)
+          .listItem(
+            mockERC1155.address,
+            firstTokenId,
+            11,
+            ZERO_ADDRESS,
+            pricePerItem,
+            await getCurrentBlockTimestamp(),
+          ),
+      ).to.be.revertedWith("must hold enough nfts");
+    });
+
+    it("Should revert if not approved (ERC1155)", async () => {
+      await expect(
+        marketplace
+          .connect(minter)
+          .listItem(
+            mockERC1155.address,
+            firstTokenId,
+            10,
+            ZERO_ADDRESS,
+            pricePerItem,
+            await getCurrentBlockTimestamp(),
+          ),
+      ).to.be.revertedWith("item not approved");
+    });
+
+    it("Should revert if the item type is not NFT", async () => {
+      await expect(
+        marketplace
+          .connect(minter)
+          .listItem(mockERC20.address, firstTokenId, 10, ZERO_ADDRESS, pricePerItem, await getCurrentBlockTimestamp()),
+      ).to.be.revertedWith("invalid nft address");
     });
 
     it("Should revert if the collection is not approved", async () => {
@@ -115,7 +179,7 @@ describe("Marketplace", () => {
       ).to.be.revertedWith("invalid pay token");
     });
 
-    it("Should list the item with the native token", async () => {
+    it("Should list the item with the native token (ERC721)", async () => {
       await tokenRegistry.addCollection(mockERC721.address);
       await mockERC721.connect(minter).setApprovalForAll(marketplace.address, true);
       await marketplace
@@ -123,14 +187,14 @@ describe("Marketplace", () => {
         .listItem(mockERC721.address, firstTokenId, 1, ZERO_ADDRESS, pricePerItem, await getCurrentBlockTimestamp());
     });
 
-    it("Should list the item with the ERC20 token", async () => {
-      await tokenRegistry.addCollection(mockERC721.address);
+    it("Should list the item with the ERC20 token (ERC1155)", async () => {
+      await tokenRegistry.addCollection(mockERC1155.address);
       await tokenRegistry.addPayToken(mockERC20.address);
-      await mockERC721.connect(minter).setApprovalForAll(marketplace.address, true);
+      await mockERC1155.connect(minter).setApprovalForAll(marketplace.address, true);
       await marketplace
         .connect(minter)
         .listItem(
-          mockERC721.address,
+          mockERC1155.address,
           firstTokenId,
           1,
           mockERC20.address,
