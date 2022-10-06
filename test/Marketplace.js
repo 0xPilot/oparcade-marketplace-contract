@@ -278,6 +278,20 @@ describe("Marketplace", () => {
       await marketplace
         .connect(minter)
         .listItem(mockERC721.address, firstTokenId, 1, ZERO_ADDRESS, pricePerItem, await getCurrentBlockTimestamp());
+
+      await tokenRegistry.addCollection(mockERC1155.address);
+      await tokenRegistry.addPayToken(mockERC20.address);
+      await mockERC1155.connect(minter).setApprovalForAll(marketplace.address, true);
+      await marketplace
+        .connect(minter)
+        .listItem(
+          mockERC1155.address,
+          firstTokenId,
+          5,
+          mockERC20.address,
+          pricePerItem,
+          await getCurrentBlockTimestamp(),
+        );
     });
 
     it("Should revert if the seller doesn't own the item", async () => {
@@ -313,7 +327,13 @@ describe("Marketplace", () => {
       ).to.be.revertedWith("insufficient Ether to buy");
     });
 
-    it("Should buy the item", async () => {
+    it("Should revert if the payment token is not valid", async () => {
+      await expect(
+        marketplace.connect(buyer).buyItem(mockERC721.address, firstTokenId, mockERC20.address, minter.address),
+      ).to.be.revertedWith("invalid pay token");
+    });
+
+    it("Should buy the item with the native token (ERC721)", async () => {
       const feeRecipientBalanceBefore = await feeRecipient.getBalance();
       const minterBalanceBefore = await minter.getBalance();
 
@@ -327,6 +347,22 @@ describe("Marketplace", () => {
         pricePerItem.mul(platformFee).div(1000),
       );
       expect(minterBalanceAfter.sub(minterBalanceBefore)).to.be.equal(pricePerItem.mul(1000 - platformFee).div(1000));
+    });
+
+    it("Should buy the item with ERC20 token (ERC1155)", async () => {
+      const feeRecipientBalanceBefore = await mockERC20.balanceOf(feeRecipient.address);
+      const minterBalanceBefore = await mockERC20.balanceOf(minter.address);
+
+      const totalAmount = pricePerItem.mul(5);
+      await mockERC20.connect(buyer).approve(marketplace.address, totalAmount);
+      await marketplace.connect(buyer).buyItem(mockERC1155.address, firstTokenId, mockERC20.address, minter.address);
+
+      const feeRecipientBalanceAfter = await mockERC20.balanceOf(feeRecipient.address);
+      const minterBalanceAfter = await mockERC20.balanceOf(minter.address);
+      expect(feeRecipientBalanceAfter.sub(feeRecipientBalanceBefore)).to.be.equal(
+        totalAmount.mul(platformFee).div(1000),
+      );
+      expect(minterBalanceAfter.sub(minterBalanceBefore)).to.be.equal(totalAmount.mul(1000 - platformFee).div(1000));
     });
   });
 
