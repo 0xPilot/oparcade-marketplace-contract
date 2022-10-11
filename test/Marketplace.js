@@ -517,6 +517,7 @@ describe("Marketplace", () => {
 
   describe("acceptOffer", () => {
     beforeEach(async () => {
+      // ERC721
       await tokenRegistry.addCollection(mockERC721.address);
       await tokenRegistry.addPayToken(mockERC20.address);
 
@@ -531,18 +532,44 @@ describe("Marketplace", () => {
           100,
           (await getCurrentBlockTimestamp()) + 300,
         );
+
+      // ERC1155
+      await tokenRegistry.addCollection(mockERC1155.address);
+
+      await marketplace
+        .connect(buyer)
+        .createOffer(
+          mockERC1155.address,
+          firstTokenId,
+          mockERC20.address,
+          5,
+          20,
+          (await getCurrentBlockTimestamp()) + 300,
+        );
     });
 
-    it("Should revert if the offer is accepted by non NFT owner", async () => {
+    it("Should revert if the offer is accepted by non NFT owner (ERC721)", async () => {
       await mockERC721.connect(minter).setApprovalForAll(marketplace.address, true);
       await expect(marketplace.acceptOffer(mockERC721.address, firstTokenId, buyer.address)).to.be.revertedWith(
         "not owning item",
       );
     });
 
-    it("Should accept the offer", async () => {
+    it("Should revert if the offer is accepted by non NFT owner (ERC1155)", async () => {
+      await mockERC1155.connect(minter).setApprovalForAll(marketplace.address, true);
+      await expect(marketplace.acceptOffer(mockERC1155.address, firstTokenId, buyer.address)).to.be.revertedWith(
+        "not owning item",
+      );
+    });
+
+    it("Should accept the offer (ERC721)", async () => {
       await mockERC721.connect(minter).setApprovalForAll(marketplace.address, true);
       await marketplace.connect(minter).acceptOffer(mockERC721.address, firstTokenId, buyer.address);
+    });
+
+    it("Should accept the offer (ERC1155)", async () => {
+      await mockERC1155.connect(minter).setApprovalForAll(marketplace.address, true);
+      await marketplace.connect(minter).acceptOffer(mockERC1155.address, firstTokenId, buyer.address);
     });
 
     it("Should revert if the offer not exist or expired", async () => {
